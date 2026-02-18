@@ -1,11 +1,12 @@
 /**
  * Content Quality Analyzer
  * Detects jargon stuffing, content repetition, extreme sentence length,
- * and low substance (type-token ratio) in content.
+ * low substance (type-token ratio), and monotonous sentence length in content.
  */
 
 import { stripMarkdown, countWords } from './word-counter.js';
 import { analyzeWordComplexity } from './word-complexity.js';
+import { extractSentences } from './geo-advanced-analyzer.js';
 
 // ─── Jargon / Word Complexity Detection ─────────────────────────────────────
 
@@ -257,6 +258,54 @@ export function analyzeFaqQuality(body: string): FaqQualityAnalysis {
     questionCount: qaPairs.length,
     avgAnswerWordCount: qaPairs.length > 0 ? totalAnswerWords / qaPairs.length : 0,
     shortAnswers,
+  };
+}
+
+// ─── Sentence Variety Analysis ─────────────────────────────────────────────
+
+export interface SentenceVarietyAnalysis {
+  /** Mean sentence length in words */
+  avgLength: number;
+  /** Standard deviation of sentence lengths */
+  stdDev: number;
+  /** Coefficient of variation (stdDev / avgLength) — normalized measure */
+  coefficientOfVariation: number;
+  /** Total sentences analyzed */
+  totalSentences: number;
+}
+
+/**
+ * Analyze sentence length variety using coefficient of variation.
+ * Low CV = monotonous (all sentences are similar length).
+ * High CV = varied (mix of short and long sentences).
+ *
+ * @example
+ * analyzeSentenceVariety("Short one. Another short. Yet another short.")
+ * // { coefficientOfVariation: ~0.1, ... }  — very monotonous
+ */
+export function analyzeSentenceVariety(body: string): SentenceVarietyAnalysis {
+  const sentences = extractSentences(body);
+
+  if (sentences.length < 2) {
+    return { avgLength: 0, stdDev: 0, coefficientOfVariation: 0, totalSentences: sentences.length };
+  }
+
+  const lengths = sentences.map(s => s.wordCount);
+  const mean = lengths.reduce((sum, l) => sum + l, 0) / lengths.length;
+
+  if (mean === 0) {
+    return { avgLength: 0, stdDev: 0, coefficientOfVariation: 0, totalSentences: sentences.length };
+  }
+
+  const variance = lengths.reduce((sum, l) => sum + (l - mean) ** 2, 0) / lengths.length;
+  const stdDev = Math.sqrt(variance);
+  const cv = stdDev / mean;
+
+  return {
+    avgLength: Math.round(mean * 10) / 10,
+    stdDev: Math.round(stdDev * 10) / 10,
+    coefficientOfVariation: Math.round(cv * 100) / 100,
+    totalSentences: sentences.length,
   };
 }
 

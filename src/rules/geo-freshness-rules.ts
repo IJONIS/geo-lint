@@ -155,7 +155,7 @@ export const geoPassiveVoiceExcess: Rule = {
     const wordCount = countWords(item.body);
     if (wordCount < FRESHNESS_MIN_WORDS) return [];
 
-    const { passiveSentences, totalSentences, passiveRatio } = analyzePassiveVoice(item.body);
+    const { passiveSentences, totalSentences, passiveRatio } = analyzePassiveVoice(item.body, item.locale);
 
     if (passiveRatio > PASSIVE_VOICE_THRESHOLD) {
       const percentage = Math.round(passiveRatio * 100);

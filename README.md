@@ -26,7 +26,7 @@ This works today with Claude Code, Cursor, Windsurf, Copilot, or any agent that 
 
 **GEO (Generative Engine Optimization)** is the practice of optimizing content so it gets cited by AI search engines -- ChatGPT, Perplexity, Google AI Overviews, Gemini. When someone asks an AI a question, the model pulls from web content to build its answer. GEO makes your content the source it pulls from.
 
-Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. They're complementary, but GEO requires structural changes that no existing SEO tool checks for. `@ijonis/geo-lint` validates both -- 46 SEO rules and **35 dedicated GEO rules** that have zero open-source alternatives.
+Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. They're complementary, but GEO requires structural changes that no existing SEO tool checks for. `@ijonis/geo-lint` validates both -- 32 SEO rules, **35 dedicated GEO rules**, and **14 content quality rules** including readability analysis inspired by Yoast SEO -- with zero open-source alternatives for the GEO checks.
 
 ---
 
@@ -64,6 +64,8 @@ Or let your agent handle it -- see [Agent Integration](#agent-integration) below
 ## GEO Rules
 
 No other open-source linter checks for these. 35 rules across E-E-A-T signals, content structure, freshness, and RAG optimization -- each targeting a specific content pattern that AI search engines use when deciding what to cite. When your agent fixes a GEO violation, it's directly increasing the probability that the content gets pulled into AI-generated answers.
+
+> **New in 0.1.1:** 14 content quality rules now include transition word analysis, consecutive sentence start detection, and sentence length variety scoring -- readability checks inspired by Yoast SEO, built for the agentic lint-fix loop.
 
 ### Core GEO Rules (7 rules)
 
@@ -224,14 +226,14 @@ headquarters, using modern frameworks and cloud infrastructure.
 
 ## All Rules
 
-`@ijonis/geo-lint` ships with 81 rules across 5 categories. Here is a summary:
+`@ijonis/geo-lint` ships with 92 rules across 5 categories. Here is a summary:
 
 | Category | Rules | Severity Mix | Focus |
 |----------|-------|-------------|-------|
-| SEO | 27 | 6 errors, 21 warnings | Titles, descriptions, headings, slugs, OG images, canonical URLs, keywords, links, schema |
-| Content | 7 | 2 errors, 5 warnings | Word count, readability, dates, categories |
-| Technical | 9 | 3 errors, 6 warnings | Broken links, image files, trailing slashes, external URLs, performance |
-| i18n | 2 | 0 errors, 2 warnings | Translation pairs, locale metadata |
+| SEO | 32 | 6 errors, 26 warnings | Titles, descriptions, headings, slugs, OG images, canonical URLs, keywords, links, schema |
+| Content | 14 | 2 errors, 12 warnings | Word count, readability, dates, categories, jargon density, repetition, vocabulary diversity, transition words, sentence variety |
+| Technical | 8 | 3 errors, 5 warnings | Broken links, image files, trailing slashes, external URLs, performance |
+| i18n | 3 | 0 errors, 3 warnings | Translation pairs, locale metadata |
 | GEO | 35 | 0 errors, 35 warnings | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization |
 
 <details>
@@ -349,12 +351,19 @@ headquarters, using modern frameworks and cloud infrastructure.
 |------|----------|-------------|
 | `orphan-content` | warning | Content should be linked from at least one other page |
 
-**Content Quality (2 rules)**
+**Content Quality (14 rules)**
 
 | Rule | Severity | Description |
 |------|----------|-------------|
 | `content-too-short` | warning | Content should meet minimum word count (300) |
 | `low-readability` | warning | Content should meet minimum readability score |
+| `content-jargon-density` | warning | Complex/uncommon word density exceeds 8% (error at 15%) |
+| `content-repetition` | warning | High paragraph similarity or repeated phrases |
+| `content-sentence-length-extreme` | warning | Average sentence length exceeds 35 words (error at 50) |
+| `content-substance-ratio` | warning | Low vocabulary diversity (type-token ratio below 25%) |
+| `content-low-transition-words` | warning | Fewer than 20% of sentences contain transition words (error at 10%) |
+| `content-consecutive-starts` | warning | 3+ consecutive sentences start with the same word (error at 5+) |
+| `content-sentence-variety` | warning | Monotonous sentence lengths (coefficient of variation below 0.30) |
 
 **Date Validation (3 rules)**
 
@@ -653,7 +662,7 @@ The adapter runs through the **programmatic API** (`lint()` / `lintQuiet()`), so
 ```
 Your content (Astro, HTML, CMS, DB, …)
   → Adapter maps each page to a ContentItem
-    → geo-lint runs all 80+ rules against those items
+    → geo-lint runs all 92 rules against those items
       → JSON violations come back, agent fixes content
 ```
 

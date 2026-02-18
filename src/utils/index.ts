@@ -14,3 +14,5 @@ export * from './slug-resolver.js';
 export * from './display-path.js';
 export * from './content-quality-analyzer.js';
 export * from './word-complexity.js';
+export * from './transition-word-analyzer.js';
+export * from './sentence-beginnings-analyzer.js';

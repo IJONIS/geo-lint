@@ -20,9 +20,23 @@ const QUESTION_WORDS = [
  * These indicate introductory filler rather than direct answers
  */
 const WEAK_LEAD_STARTS = [
-  'in this', 'the following', 'diesem',
-  "let's", 'lass uns',
-  'this section', 'dieser abschnitt',
+  // English — generic filler openings
+  'in this', 'the following', 'this section', 'this article',
+  'this post', 'this guide', 'this chapter',
+  'as we discussed', 'as mentioned', 'as noted', 'as stated',
+  'it is important to', 'it should be noted', 'it is worth noting',
+  'it is well known', 'it goes without saying',
+  'in the following', 'in this section', 'in this article',
+  'there are many', 'there are several', 'there are a number of',
+  'we will discuss', 'we will explore', 'we will examine',
+  "let's", "let's take a look",
+  // German — generische Fülleröffnungen
+  'dieser abschnitt', 'dieser artikel', 'dieser beitrag',
+  'diesem', 'lass uns', 'im folgenden',
+  'wie bereits erwähnt', 'wie oben erwähnt',
+  'es ist wichtig', 'es sei darauf hingewiesen',
+  'es gibt viele', 'es gibt zahlreiche',
+  'wir werden', 'schauen wir uns',
 ];
 
 /**

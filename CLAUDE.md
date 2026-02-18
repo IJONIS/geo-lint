@@ -62,11 +62,11 @@ An empty array `[]` means zero violations — the content is clean.
 
 | Category  | Count | What it checks |
 |-----------|-------|----------------|
-| SEO       | 27    | titles, descriptions, headings, slugs, links, images, schema |
+| SEO       | 32    | titles, descriptions, headings, slugs, links, images, schema, keywords, canonical URLs, duplicates |
 | GEO       | 35    | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization, question headings, FAQ sections, tables, entity density |
-| Content   | 7     | word count, readability, dates, categories |
-| Technical | 9     | broken links, image files, external URLs |
-| i18n      | 2     | translation pairs, locale metadata |
+| Content   | 14    | word count, readability, dates, categories, jargon density, repetition, sentence length, vocabulary diversity, transition words, sentence variety, consecutive starts |
+| Technical | 8     | broken links, image files, external URLs, trailing slashes |
+| i18n      | 3     | translation pairs, locale metadata |
 
 ## Codebase conventions
 

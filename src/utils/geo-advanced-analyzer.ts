@@ -120,19 +120,44 @@ export function analyzeFaqQuality(body: string): FaqQualityResult {
 }
 
 /**
- * Detect passive voice sentences (English heuristic: be + past participle).
- * Returns count of total sentences, passive sentences, and the ratio.
+ * German passive voice auxiliary verbs (all conjugations of "werden")
+ */
+const GERMAN_PASSIVE_AUXILIARIES = new Set([
+  'werde', 'wirst', 'wird', 'werden', 'werdet',
+  'wurde', 'wurdest', 'wurden', 'wurdet',
+  'worden', 'würde', 'würdest', 'würden', 'würdet',
+]);
+
+/**
+ * German past participle regex patterns.
+ * German participles typically follow: ge-...-t, ge-...-en, or -iert.
+ * Separable prefixes (ab-, an-, auf-, etc.) insert "ge" after the prefix.
+ * Inseparable prefixes (be-, ent-, er-, ver-, zer-, über-) have no "ge-".
+ */
+const GERMAN_PARTICIPLE_PATTERNS: RegExp[] = [
+  /^ge\S+t$/i,                                           // gemacht, gesagt
+  /^ge\S+en$/i,                                          // geschrieben, gefunden
+  /^\S+iert$/i,                                           // organisiert, implementiert
+  /^(ab|an|auf|aus|vor|wieder|zurück)ge\S+(t|en)$/i,    // aufgemacht, angenommen
+  /^(be|ent|er|her|ver|zer|über)\S+([^s]t|en)$/i,       // bearbeitet, verstanden
+];
+
+/**
+ * Detect passive voice sentences with locale support.
+ * English: "be" form + past participle within 3 words.
+ * German: "werden" conjugation + past participle within 5 words.
  *
  * @example
- * analyzePassiveVoice("The report was written by the team.")
- * // { totalSentences: 1, passiveSentences: 1, passiveRatio: 1.0 }
+ * analyzePassiveVoice("The report was written by the team.") // passiveRatio: 1.0
+ * analyzePassiveVoice("Der Bericht wurde geschrieben.", "de") // passiveRatio: 1.0
  */
-export function analyzePassiveVoice(body: string): PassiveVoiceResult {
+export function analyzePassiveVoice(body: string, locale?: string): PassiveVoiceResult {
   const sentences = extractSentences(body);
+  const lang = (locale ?? 'en').toLowerCase();
   let passiveCount = 0;
 
   for (const { text } of sentences) {
-    if (isPassiveSentence(text)) {
+    if (lang === 'de' ? isGermanPassiveSentence(text) : isEnglishPassiveSentence(text)) {
       passiveCount++;
     }
   }
@@ -146,10 +171,10 @@ export function analyzePassiveVoice(body: string): PassiveVoiceResult {
 }
 
 /**
- * Check if a single sentence contains passive voice construction.
+ * Check if a single English sentence contains passive voice construction.
  * Heuristic: a form of "be" followed within 3 words by a past participle.
  */
-function isPassiveSentence(sentence: string): boolean {
+function isEnglishPassiveSentence(sentence: string): boolean {
   const words = sentence.toLowerCase().split(/\s+/).filter(w => w.length > 0);
 
   for (let i = 0; i < words.length; i++) {
@@ -161,6 +186,32 @@ function isPassiveSentence(sentence: string): boolean {
     for (let j = i + 1; j < searchEnd; j++) {
       const candidate = words[j].replace(/[^a-z]/g, '');
       if (candidate.endsWith('ed') || IRREGULAR_PAST_PARTICIPLES.has(candidate)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Check if a single German sentence contains passive voice construction.
+ * Heuristic: a "werden" conjugation followed within 5 words by a past participle.
+ * German word order is more flexible than English, so the window is wider.
+ */
+function isGermanPassiveSentence(sentence: string): boolean {
+  const words = sentence.toLowerCase().split(/\s+/).filter(w => w.length > 0);
+
+  for (let i = 0; i < words.length; i++) {
+    const cleaned = words[i].replace(/[^a-zäöüß]/g, '');
+    if (!GERMAN_PASSIVE_AUXILIARIES.has(cleaned)) continue;
+
+    // Check next 5 words for a German past participle
+    const searchEnd = Math.min(i + 6, words.length);
+    for (let j = i + 1; j < searchEnd; j++) {
+      const candidate = words[j].replace(/[^a-zäöüß]/g, '');
+      if (candidate.length < 3) continue;
+      if (GERMAN_PARTICIPLE_PATTERNS.some(p => p.test(candidate))) {
         return true;
       }
     }

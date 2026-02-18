@@ -1,7 +1,8 @@
 /**
  * Content Quality Rules
  * Detects jargon stuffing, content repetition, extreme sentence lengths,
- * and low substance (type-token ratio).
+ * low substance, low transition word usage, monotonous sentence starts,
+ * and lack of sentence length variety.
  */
 
 import type { Rule, ContentItem, LintResult, RuleContext } from '../types.js';
@@ -12,7 +13,10 @@ import {
   analyzeRepetition,
   analyzeSentenceLength,
   analyzeSubstance,
+  analyzeSentenceVariety,
 } from '../utils/content-quality-analyzer.js';
+import { analyzeTransitionWords } from '../utils/transition-word-analyzer.js';
+import { analyzeSentenceBeginnings } from '../utils/sentence-beginnings-analyzer.js';
 
 /** Minimum word count before quality rules apply */
 const QUALITY_MIN_WORDS = 300;
@@ -33,6 +37,21 @@ const SENTENCE_AVG_ERROR = 50;
 /** Substance (type-token ratio) thresholds — lower = less diverse vocabulary */
 const SUBSTANCE_WARNING_THRESHOLD = 0.25;
 const SUBSTANCE_ERROR_THRESHOLD = 0.15;
+
+/** Transition words thresholds (ratio of sentences containing transition words) */
+const TRANSITION_WARNING_THRESHOLD = 0.20;
+const TRANSITION_ERROR_THRESHOLD = 0.10;
+const TRANSITION_MIN_WORDS = 200;
+
+/** Consecutive sentence beginnings */
+const CONSECUTIVE_STARTS_WARNING = 3;
+const CONSECUTIVE_STARTS_ERROR = 5;
+const CONSECUTIVE_STARTS_MIN_WORDS = 100;
+
+/** Sentence variety thresholds (coefficient of variation) */
+const VARIETY_WARNING_THRESHOLD = 0.30;
+const VARIETY_MIN_WORDS = 300;
+const VARIETY_MIN_SENTENCES = 10;
 
 // ─── Jargon Density Rule ───────────────────────────────────────────────────
 
@@ -218,10 +237,130 @@ export const substanceRatio: Rule = {
   },
 };
 
+// ─── Transition Words Rule ────────────────────────────────────────────────
+
+export const lowTransitionWords: Rule = {
+  name: 'content-low-transition-words',
+  severity: 'warning',
+  category: 'content',
+  fixStrategy: 'Add transition words (however, therefore, for example, in addition) to connect ideas between sentences',
+  run: (item: ContentItem): LintResult[] => {
+    const wordCount = countWords(item.body);
+    if (wordCount < TRANSITION_MIN_WORDS) return [];
+
+    const locale = item.locale ?? 'en';
+    const analysis = analyzeTransitionWords(item.body, locale);
+
+    if (analysis.totalSentences < 5) return [];
+
+    if (analysis.ratio < TRANSITION_ERROR_THRESHOLD) {
+      return [{
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'content-low-transition-words',
+        severity: 'error',
+        message: `Very few transition words: ${Math.round(analysis.ratio * 100)}% of sentences (${analysis.sentencesWithTransition}/${analysis.totalSentences}) — aim for at least 20%`,
+        suggestion: 'Add transition words to connect ideas: "however", "therefore", "for example", "in addition", "as a result". Content reads as disconnected statements without them.',
+      }];
+    }
+
+    if (analysis.ratio < TRANSITION_WARNING_THRESHOLD) {
+      return [{
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'content-low-transition-words',
+        severity: 'warning',
+        message: `Low transition word usage: ${Math.round(analysis.ratio * 100)}% of sentences (${analysis.sentencesWithTransition}/${analysis.totalSentences}) — aim for at least 20%`,
+        suggestion: 'Improve content flow by adding transition words: "however", "therefore", "for example", "in contrast", "as a result".',
+      }];
+    }
+
+    return [];
+  },
+};
+
+// ─── Consecutive Sentence Beginnings Rule ─────────────────────────────────
+
+export const consecutiveStarts: Rule = {
+  name: 'content-consecutive-starts',
+  severity: 'warning',
+  category: 'content',
+  fixStrategy: 'Vary sentence openings — use transition words, prepositional phrases, or reversed structures',
+  run: (item: ContentItem): LintResult[] => {
+    const wordCount = countWords(item.body);
+    if (wordCount < CONSECUTIVE_STARTS_MIN_WORDS) return [];
+
+    const locale = item.locale ?? 'en';
+    const analysis = analyzeSentenceBeginnings(item.body, locale);
+
+    if (analysis.groups.length === 0) return [];
+
+    // Report the worst group (highest count)
+    const worst = analysis.groups.reduce((a, b) => a.count > b.count ? a : b);
+
+    if (worst.count >= CONSECUTIVE_STARTS_ERROR) {
+      return [{
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'content-consecutive-starts',
+        severity: 'error',
+        message: `${worst.count} consecutive sentences start with "${worst.word}" — vary sentence openings`,
+        suggestion: `Rephrase some sentences to begin with different words. Try starting with a transition word, a prepositional phrase, or by reversing the sentence structure.`,
+      }];
+    }
+
+    if (worst.count >= CONSECUTIVE_STARTS_WARNING) {
+      return [{
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'content-consecutive-starts',
+        severity: 'warning',
+        message: `${worst.count} consecutive sentences start with "${worst.word}" — vary sentence openings`,
+        suggestion: `Rephrase some sentences to begin with different words. Try starting with a transition word, a prepositional phrase, or by reversing the sentence structure.`,
+      }];
+    }
+
+    return [];
+  },
+};
+
+// ─── Sentence Variety Rule ────────────────────────────────────────────────
+
+export const sentenceVariety: Rule = {
+  name: 'content-sentence-variety',
+  severity: 'warning',
+  category: 'content',
+  fixStrategy: 'Mix short punchy sentences with longer explanatory ones for better rhythm',
+  run: (item: ContentItem): LintResult[] => {
+    const wordCount = countWords(item.body);
+    if (wordCount < VARIETY_MIN_WORDS) return [];
+
+    const analysis = analyzeSentenceVariety(item.body);
+
+    if (analysis.totalSentences < VARIETY_MIN_SENTENCES) return [];
+
+    if (analysis.coefficientOfVariation < VARIETY_WARNING_THRESHOLD) {
+      return [{
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'content-sentence-variety',
+        severity: 'warning',
+        message: `Monotonous sentence lengths: CV ${analysis.coefficientOfVariation} (avg ${analysis.avgLength} words, std dev ${analysis.stdDev}). Mix short and long sentences.`,
+        suggestion: 'Vary sentence length: follow a long sentence with a short one. Use fragments for emphasis. Break up paragraphs with 5-10 word sentences between 25+ word ones.',
+      }];
+    }
+
+    return [];
+  },
+};
+
 /** All content quality rules */
 export const contentQualityRules: Rule[] = [
   jargonDensity,
   contentRepetition,
   sentenceLengthExtreme,
   substanceRatio,
+  lowTransitionWords,
+  consecutiveStarts,
+  sentenceVariety,
 ];
