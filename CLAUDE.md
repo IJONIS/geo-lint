@@ -4,7 +4,9 @@ This file gives AI agents the context needed to work in this repository and to r
 
 ## What this project is
 
-`@ijonis/geo-lint` is a CLI and programmatic linter for Markdown/MDX content. It validates SEO and GEO (Generative Engine Optimization) rules and outputs structured violations that agents consume, fix, and re-lint.
+`@ijonis/geo-lint` is a CLI and programmatic linter for content. It validates SEO and GEO (Generative Engine Optimization) rules and outputs structured violations that agents consume, fix, and re-lint.
+
+Out of the box it scans Markdown/MDX files. For other formats (Astro, HTML, Nuxt, etc.), a small custom adapter script maps the content into the same shape -- see Workflow C below.
 
 The primary use case is agentic: run the linter, read violations, fix the content, re-lint until clean.
 
@@ -165,3 +167,83 @@ Instructions:
 5. Stop after 5 iterations
 6. Report what was fixed and what could not be resolved, with reasons
 ```
+
+---
+
+## Workflow C: Non-MDX projects (Astro, HTML, Nuxt, etc.)
+
+The CLI and default adapter assume `.md`/`.mdx` files with `gray-matter` frontmatter. If the project uses a different format, **create a custom adapter script** that maps the content into `ContentItem` objects, then run the programmatic API.
+
+### When to use this workflow
+
+- The project has `.astro`, `.html`, `.vue`, `.njk`, or other non-MDX content files
+- Content metadata lives in `<meta>` tags, component props, or framework-specific frontmatter rather than YAML frontmatter
+- Content is stored in a CMS or database, not in files
+
+### Steps
+
+1. **Inspect the project** to understand where content lives and how metadata is stored:
+   - For Astro: check `src/content/` (content collections) or `src/pages/` (`.astro` pages)
+   - For HTML: find the root directory with `.html` files
+   - For other frameworks: identify the content directory and file format
+
+2. **Create `scripts/lint.ts`** with a custom adapter. The adapter must return `ContentItem[]`:
+
+   ```typescript
+   import { lint, createAdapter } from '@ijonis/geo-lint';
+   // + whatever parsing the format needs (cheerio for HTML, gray-matter for MD, etc.)
+
+   const adapter = createAdapter((projectRoot) => {
+     // 1. Find content files
+     // 2. Parse each file to extract: title, slug, description, body, etc.
+     // 3. Return ContentItem[] — see README "Custom Adapters" for the full interface
+   });
+
+   const exitCode = await lint({ adapter, projectRoot: process.cwd(), format: 'json' });
+   process.exit(exitCode);
+   ```
+
+3. **Required `ContentItem` fields** (the adapter must provide all of these):
+   - `title` — page title
+   - `slug` — URL slug
+   - `description` — meta description
+   - `permalink` — full URL path (e.g., `/blog/my-post`)
+   - `contentType` — one of `'blog'`, `'page'`, `'project'`
+   - `filePath` — absolute path to the source file on disk (needed for image resolution)
+   - `rawContent` — full file content as-is
+   - `body` — renderable body content (strip frontmatter, scripts, layout wrappers)
+
+4. **Run the adapter script** instead of the CLI:
+   ```bash
+   npx tsx scripts/lint.ts
+   ```
+
+5. **Parse the JSON output and fix violations** using the same Workflow A loop (read violations → fix → re-run → repeat).
+
+### Key differences from the CLI workflow
+
+- **Run the script, not `npx geo-lint`** — the adapter bypasses the CLI's built-in MDX loader
+- **`filePath` must point to real files** — rules like `image-not-found` resolve paths relative to `filePath`
+- **`body` should contain only renderable content** — strip `<script>`, `<style>`, layout boilerplate, and framework directives; rules analyze headings, paragraphs, and links
+- **`contentType` controls which rules fire** — `'blog'` enables date/author/category rules; use `'page'` for generic pages
+- **Config still applies** — `geo-lint.config.ts` settings (`siteUrl`, `categories`, `rules`, etc.) are still loaded; only `contentPaths` is bypassed
+
+### Format-specific tips
+
+| Format | How to extract metadata | `body` extraction |
+|--------|------------------------|-------------------|
+| **Astro content collections** (`.md`/`.mdx` in `src/content/`) | Parse with `gray-matter` — works the same as MDX | `gray-matter`'s `content` field |
+| **Astro pages** (`.astro`) | Parse the `---` frontmatter block for variable assignments | Everything after the closing `---` |
+| **HTML** | Use `cheerio` to read `<title>`, `<meta name="description">`, `<meta property="og:image">` | `$('main').html()` or `$('body').html()` |
+| **Nuxt/Vue** | Parse `<script setup>` for `useHead()` or `useSeoMeta()` calls | `<template>` content |
+| **Headless CMS** | Fetch via API, map response fields directly | API response body field |
+
+### Concrete examples
+
+The README has full, copy-paste-ready adapter examples for:
+- Astro content collections
+- Static HTML sites (with cheerio)
+- `.astro` component pages
+- CMS/API sources
+
+See the **Custom Adapters** section in `README.md`.
