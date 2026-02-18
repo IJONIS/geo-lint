@@ -1,0 +1,77 @@
+{
+  "name": "@ijonis/geo-lint",
+  "version": "0.1.0",
+  "description": "SEO and GEO (Generative Engine Optimization) linter for Markdown/MDX content — the first open-source linter that checks your content for AI search visibility",
+  "license": "MIT",
+  "author": "IJONIS <hello@ijonis.com> (https://ijonis.com)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ijonis/geo-lint.git"
+  },
+  "homepage": "https://github.com/ijonis/geo-lint#readme",
+  "bugs": {
+    "url": "https://github.com/ijonis/geo-lint/issues"
+  },
+  "keywords": [
+    "seo",
+    "geo",
+    "generative-engine-optimization",
+    "linter",
+    "mdx",
+    "markdown",
+    "content",
+    "ai-search",
+    "llm",
+    "build-tool"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "bin": {
+    "geo-lint": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "jiti": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "@vitest/coverage-v8": "^3.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
