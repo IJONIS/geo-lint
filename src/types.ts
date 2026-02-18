@@ -45,6 +45,8 @@ export interface ContentItem {
   updatedAt?: string;
   noindex?: boolean;
   draft?: boolean;
+  /** Content author name (from frontmatter) */
+  author?: string;
 
   /** Content type: blog, page, or project */
   contentType: ContentType;

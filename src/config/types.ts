@@ -22,6 +22,18 @@ export interface GeoConfig {
   brandCity: string;
   /** Path to geo-keywords markdown file, relative to project root. Empty = skip */
   keywordsPath: string;
+  /** Filler phrases flagged in article openings (vague-opening rule) */
+  fillerPhrases?: string[];
+  /** Summary/takeaway trigger phrases (extraction-triggers rule) */
+  extractionTriggers?: string[];
+  /** Common acronyms that do not require expansion (e.g. HTML, API) */
+  acronymAllowlist?: string[];
+  /** Single-word headings considered too vague */
+  vagueHeadings?: string[];
+  /** Author names flagged as generic (e.g. 'Admin', 'Team') */
+  genericAuthorNames?: string[];
+  /** MDX component tags allowed in markdown (not flagged by inline-html rule) */
+  allowedHtmlTags?: string[];
 }
 
 /** User-facing configuration (partial, with defaults applied) */

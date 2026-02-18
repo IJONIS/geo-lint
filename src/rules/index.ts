@@ -31,6 +31,12 @@ import { createGeoRules } from './geo-rules.js';
 import { createCategoryRules } from './category-rules.js';
 import { createCanonicalRules } from './canonical-rules.js';
 
+// GEO advanced rule imports
+import { createGeoEeatRules } from './geo-eeat-rules.js';
+import { geoStructureRules } from './geo-structure-rules.js';
+import { createGeoFreshnessRules } from './geo-freshness-rules.js';
+import { createGeoRagRules } from './geo-rag-rules.js';
+
 /**
  * Build the complete rule set from config and link extractor
  */
@@ -54,6 +60,10 @@ export function buildRules(config: GeoLintConfig, linkExtractor: LinkExtractor):
     ...(config.categories.length > 0 ? createCategoryRules(config.categories) : []),
     ...schemaRules,
     ...createGeoRules(config.geo),
+    ...createGeoEeatRules(config.geo),
+    ...geoStructureRules,
+    ...createGeoFreshnessRules(config.geo),
+    ...createGeoRagRules(config.geo),
     ...keywordCoherenceRules,
     ...createCanonicalRules(config.siteUrl),
   ];
@@ -148,3 +158,9 @@ export { createOrphanRules } from './orphan-rules.js';
 export { createGeoRules, createGeoEntityRule } from './geo-rules.js';
 export { createCategoryRules } from './category-rules.js';
 export { createCanonicalRules } from './canonical-rules.js';
+
+// GEO advanced rule re-exports
+export { geoEeatStaticRules, createGeoEeatRules } from './geo-eeat-rules.js';
+export { geoStructureRules } from './geo-structure-rules.js';
+export { geoFreshnessStaticRules, createGeoFreshnessRules } from './geo-freshness-rules.js';
+export { geoRagStaticRules, createGeoRagRules } from './geo-rag-rules.js';

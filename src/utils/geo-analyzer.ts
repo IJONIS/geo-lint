@@ -245,3 +245,234 @@ function extractFirstParagraph(sectionContent: string): string {
 
   return paragraphLines.join(' ');
 }
+
+/**
+ * Citation attribution patterns (case-insensitive)
+ */
+const CITATION_PHRASES = [
+  /according to\b/gi,
+  /a study by\b/gi,
+  /research by\b/gi,
+  /data from\b/gi,
+];
+
+/**
+ * Count source citations in content body.
+ * Matches: "according to [Source]", markdown links [text](url),
+ * blockquote attributions (> ... -- Name), footnote markers [^1]
+ *
+ * @example
+ * countSourceCitations("According to [ACME](https://acme.com), results improved by 30%.") // 2
+ */
+export function countSourceCitations(body: string): number {
+  let count = 0;
+
+  // Count attribution phrases
+  for (const pattern of CITATION_PHRASES) {
+    const matches = body.match(pattern);
+    if (matches) count += matches.length;
+  }
+
+  // Count markdown links with HTTP URLs
+  const linkPattern = /\[[^\]]+\]\(https?:\/\/[^)]+\)/g;
+  const linkMatches = body.match(linkPattern);
+  if (linkMatches) count += linkMatches.length;
+
+  // Count blockquote attributions: lines starting with > containing em-dash or double-dash attribution
+  const attributionPattern = /^>\s*.*(?:\u2014|--)\s*\S+/gm;
+  const attrMatches = body.match(attributionPattern);
+  if (attrMatches) count += attrMatches.length;
+
+  // Count footnote markers [^1], [^note], etc.
+  const footnotePattern = /\[\^[^\]]+\]/g;
+  const footnoteMatches = body.match(footnotePattern);
+  if (footnoteMatches) count += footnoteMatches.length;
+
+  return count;
+}
+
+/**
+ * Check if content has at least one attributed expert quote.
+ * Attributed: blockquote (>) followed by em-dash + name, or "said [Name]"
+ *
+ * @example
+ * hasExpertQuote('> AI will transform everything.\n> \u2014 Dr. Smith') // true
+ */
+export function hasExpertQuote(body: string): boolean {
+  const lines = body.split('\n');
+  let inBlockquote = false;
+  let blockquoteText = '';
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('>')) {
+      inBlockquote = true;
+      blockquoteText += ' ' + trimmed.slice(1).trim();
+    } else {
+      if (inBlockquote && blockquoteText) {
+        // Check for em-dash or double-dash attribution within the blockquote
+        if (/(?:\u2014|--)\s*[A-Z]/.test(blockquoteText)) {
+          return true;
+        }
+      }
+      inBlockquote = false;
+      blockquoteText = '';
+    }
+  }
+
+  // Check final blockquote if body ends with one
+  if (inBlockquote && /(?:\u2014|--)\s*[A-Z]/.test(blockquoteText)) {
+    return true;
+  }
+
+  // Check for "said [Name]" pattern anywhere
+  if (/(?:said|says)\s+[A-Z][a-z]+/.test(body)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Extract H2 sections from body, returning heading text, section body, and line number.
+ *
+ * @example
+ * extractH2Sections("## Intro\n\nHello world\n\n## Next\n\nMore text")
+ * // [{ heading: "Intro", body: "Hello world", line: 1 }, { heading: "Next", body: "More text", line: 5 }]
+ */
+export function extractH2Sections(body: string): Array<{ heading: string; body: string; line: number }> {
+  const h2Pattern = /^##\s+(.+)$/gm;
+  const matches = [...body.matchAll(h2Pattern)];
+  const sections: Array<{ heading: string; body: string; line: number }> = [];
+
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i];
+    const headingText = match[1].trim();
+    const lineNumber = body.slice(0, match.index!).split('\n').length;
+
+    const contentStart = match.index! + match[0].length;
+    const contentEnd = i + 1 < matches.length ? matches[i + 1].index! : body.length;
+    const sectionBody = body.slice(contentStart, contentEnd).trim();
+
+    sections.push({ heading: headingText, body: sectionBody, line: lineNumber });
+  }
+
+  return sections;
+}
+
+/**
+ * Split body into paragraphs (text between blank lines), with word counts.
+ * Skips code blocks, import/export lines, JSX components, and heading lines.
+ *
+ * @example
+ * getParagraphs("Hello world.\n\nAnother paragraph.") // [{ text: "Hello world.", line: 1, wordCount: 2 }, ...]
+ */
+export function getParagraphs(body: string): Array<{ text: string; line: number; wordCount: number }> {
+  const lines = body.split('\n');
+  const paragraphs: Array<{ text: string; line: number; wordCount: number }> = [];
+  let inCodeBlock = false;
+  let currentLines: string[] = [];
+  let paragraphStartLine = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // Track code block state
+    if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) {
+      inCodeBlock = !inCodeBlock;
+      // Flush current paragraph before code block
+      if (currentLines.length > 0) {
+        const text = currentLines.join(' ');
+        const wc = countWords(text);
+        if (wc > 0) {
+          paragraphs.push({ text, line: paragraphStartLine + 1, wordCount: wc });
+        }
+        currentLines = [];
+      }
+      continue;
+    }
+
+    if (inCodeBlock) continue;
+
+    // Skip import/export lines, JSX components, and heading lines
+    if (trimmed.startsWith('import ') || trimmed.startsWith('export ')) continue;
+    if (trimmed.startsWith('<') && !trimmed.startsWith('<a')) continue;
+    if (/^#{1,6}\s+/.test(trimmed)) continue;
+
+    // Blank line: flush current paragraph
+    if (!trimmed) {
+      if (currentLines.length > 0) {
+        const text = currentLines.join(' ');
+        const wc = countWords(text);
+        if (wc > 0) {
+          paragraphs.push({ text, line: paragraphStartLine + 1, wordCount: wc });
+        }
+        currentLines = [];
+      }
+      continue;
+    }
+
+    // Start new paragraph if needed
+    if (currentLines.length === 0) {
+      paragraphStartLine = i;
+    }
+    currentLines.push(trimmed);
+  }
+
+  // Flush final paragraph
+  if (currentLines.length > 0) {
+    const text = currentLines.join(' ');
+    const wc = countWords(text);
+    if (wc > 0) {
+      paragraphs.push({ text, line: paragraphStartLine + 1, wordCount: wc });
+    }
+  }
+
+  return paragraphs;
+}
+
+/**
+ * Check if body contains at least one bulleted or numbered markdown list.
+ * Matches: "- ", "* ", "1. " at start of line (outside code blocks).
+ *
+ * @example
+ * hasMarkdownList("Some text\n- item one\n- item two") // true
+ */
+export function hasMarkdownList(body: string): boolean {
+  const lines = body.split('\n');
+  let inCodeBlock = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+
+    if (inCodeBlock) continue;
+
+    // Check for unordered list items
+    if (/^[-*]\s+/.test(trimmed)) return true;
+
+    // Check for ordered list items
+    if (/^\d+\.\s+/.test(trimmed)) return true;
+  }
+
+  return false;
+}
+
+/**
+ * Count internal markdown links (relative paths starting with /).
+ * Only counts markdown link syntax [text](/path), not bare URLs.
+ *
+ * @example
+ * countInternalLinks("See [our blog](/blog) and [about](/about) pages.") // 2
+ */
+export function countInternalLinks(body: string): number {
+  const pattern = /\[([^\]]+)\]\(\/[^)]+\)/g;
+  const matches = body.match(pattern);
+  return matches ? matches.length : 0;
+}

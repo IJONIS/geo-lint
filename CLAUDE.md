@@ -61,7 +61,7 @@ An empty array `[]` means zero violations — the content is clean.
 | Category  | Count | What it checks |
 |-----------|-------|----------------|
 | SEO       | 27    | titles, descriptions, headings, slugs, links, images, schema |
-| GEO       | 7     | AI citation readiness: question headings, FAQ sections, tables, entity density |
+| GEO       | 35    | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization, question headings, FAQ sections, tables, entity density |
 | Content   | 7     | word count, readability, dates, categories |
 | Technical | 9     | broken links, image files, external URLs |
 | i18n      | 2     | translation pairs, locale metadata |

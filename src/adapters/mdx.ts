@@ -92,6 +92,7 @@ function parseContentFile(
       updatedAt: fm.updatedAt ? String(fm.updatedAt) : undefined,
       noindex: fm.noindex as boolean | undefined,
       draft: fm.draft as boolean | undefined,
+      author: fm.author as string | undefined,
       contentType: pathConfig.type as ContentType,
       filePath,
       rawContent: orig?.toString() ?? '',

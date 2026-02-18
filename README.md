@@ -26,7 +26,7 @@ This works today with Claude Code, Cursor, Windsurf, Copilot, or any agent that 
 
 **GEO (Generative Engine Optimization)** is the practice of optimizing content so it gets cited by AI search engines -- ChatGPT, Perplexity, Google AI Overviews, Gemini. When someone asks an AI a question, the model pulls from web content to build its answer. GEO makes your content the source it pulls from.
 
-Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. They're complementary, but GEO requires structural changes that no existing SEO tool checks for. `@ijonis/geo-lint` validates both -- 46 SEO rules and **7 dedicated GEO rules** that have zero open-source alternatives.
+Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. They're complementary, but GEO requires structural changes that no existing SEO tool checks for. `@ijonis/geo-lint` validates both -- 46 SEO rules and **35 dedicated GEO rules** that have zero open-source alternatives.
 
 ---
 
@@ -61,9 +61,11 @@ Or let your agent handle it -- see [Agent Integration](#agent-integration) below
 
 ---
 
-## The 7 GEO Rules
+## GEO Rules
 
-No other open-source linter checks for these. Each rule targets a specific content pattern that AI search engines use when deciding what to cite. When your agent fixes a GEO violation, it's directly increasing the probability that the content gets pulled into AI-generated answers.
+No other open-source linter checks for these. 35 rules across E-E-A-T signals, content structure, freshness, and RAG optimization -- each targeting a specific content pattern that AI search engines use when deciding what to cite. When your agent fixes a GEO violation, it's directly increasing the probability that the content gets pulled into AI-generated answers.
+
+### Core GEO Rules (7 rules)
 
 ### 1. `geo-no-question-headings`
 
@@ -222,7 +224,7 @@ headquarters, using modern frameworks and cloud infrastructure.
 
 ## All Rules
 
-`@ijonis/geo-lint` ships with 53 rules across 5 categories. Here is a summary:
+`@ijonis/geo-lint` ships with 81 rules across 5 categories. Here is a summary:
 
 | Category | Rules | Severity Mix | Focus |
 |----------|-------|-------------|-------|
@@ -230,7 +232,7 @@ headquarters, using modern frameworks and cloud infrastructure.
 | Content | 7 | 2 errors, 5 warnings | Word count, readability, dates, categories |
 | Technical | 9 | 3 errors, 6 warnings | Broken links, image files, trailing slashes, external URLs, performance |
 | i18n | 2 | 0 errors, 2 warnings | Translation pairs, locale metadata |
-| GEO | 7 | 0 errors, 7 warnings | AI citation readiness (see above) |
+| GEO | 35 | 0 errors, 35 warnings | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization |
 
 <details>
 <summary>Full rule list</summary>
@@ -376,7 +378,7 @@ headquarters, using modern frameworks and cloud infrastructure.
 | `translation-pair-missing` | warning | Translated content should have both language versions |
 | `missing-locale` | warning | Content should have a locale field |
 
-**GEO (7 rules)**
+**GEO — Core (7 rules)**
 
 | Rule | Severity | Description |
 |------|----------|-------------|
@@ -387,6 +389,54 @@ headquarters, using modern frameworks and cloud infrastructure.
 | `geo-missing-table` | warning | Long posts should include a data table |
 | `geo-short-citation-blocks` | warning | Section lead paragraphs should be 40+ words |
 | `geo-low-entity-density` | warning | Brand and location should appear in content |
+
+**GEO — E-E-A-T (8 rules)**
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| `geo-missing-source-citations` | warning | Min 1 source citation per 500 words |
+| `geo-missing-expert-quotes` | warning | Long posts need at least 1 attributed blockquote |
+| `geo-missing-author` | warning | Blog posts need a non-generic author name |
+| `geo-heading-too-vague` | warning | Headings must be 3+ words and not generic |
+| `geo-faq-quality` | warning | FAQ sections need 3+ Q&A pairs with proper formatting |
+| `geo-definition-pattern` | warning | "What is X?" headings should start with "X is..." |
+| `geo-howto-steps` | warning | "How to" headings need 3+ numbered steps |
+| `geo-missing-tldr` | warning | Long posts need a TL;DR or key takeaway near the top |
+
+**GEO — Structure (7 rules)**
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| `geo-section-too-long` | warning | H2 sections over 300 words need H3 sub-headings |
+| `geo-paragraph-too-long` | warning | Paragraphs should not exceed 100 words |
+| `geo-missing-lists` | warning | Content should include at least one list |
+| `geo-citation-block-upper-bound` | warning | First paragraph after H2 should be under 80 words |
+| `geo-orphaned-intro` | warning | Introduction before first H2 should be under 150 words |
+| `geo-heading-density` | warning | No text gap should exceed 300 words without a heading |
+| `geo-structural-element-ratio` | warning | At least 1 structural element per 500 words |
+
+**GEO — Freshness & Quality (7 rules)**
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| `geo-stale-date-references` | warning | Year references older than 18 months |
+| `geo-outdated-content` | warning | Content not updated in over 6 months |
+| `geo-passive-voice-excess` | warning | Over 15% passive voice sentences |
+| `geo-sentence-too-long` | warning | Sentences exceeding 40 words |
+| `geo-low-internal-links` | warning | Fewer than 2 internal links |
+| `geo-comparison-table` | warning | Comparison headings without a data table |
+| `geo-inline-html` | warning | Raw HTML tags in markdown content |
+
+**GEO — RAG Optimization (6 rules)**
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| `geo-extraction-triggers` | warning | Long posts need summary/takeaway phrases |
+| `geo-section-self-containment` | warning | Sections should not open with unresolved pronouns |
+| `geo-vague-opening` | warning | Articles should not start with filler phrases |
+| `geo-acronym-expansion` | warning | Acronyms must be expanded on first use |
+| `geo-statistic-without-context` | warning | Statistics need source attribution or timeframe |
+| `geo-missing-summary-section` | warning | Long posts (2000+ words) need a summary section |
 
 </details>
 
@@ -539,6 +589,12 @@ export default defineConfig({
     brandName: 'ACME Corp',   // Entity density check (empty = skip)
     brandCity: 'Berlin',       // Location entity check (empty = skip)
     keywordsPath: '',          // Reserved for future use
+    fillerPhrases: ['in this article', 'welcome to'],  // Flagged in openings
+    extractionTriggers: ['key takeaway', 'in summary'], // Summary phrases
+    acronymAllowlist: ['HTML', 'CSS', 'API', 'SEO'],   // Skip expansion check
+    vagueHeadings: ['introduction', 'overview'],        // Generic headings
+    genericAuthorNames: ['admin', 'team'],              // Flagged author names
+    allowedHtmlTags: ['Callout', 'Note'],               // MDX components
   },
 
   // Per-rule severity overrides ('error' | 'warning' | 'off')
