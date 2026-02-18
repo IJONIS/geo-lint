@@ -6,11 +6,11 @@
   "author": "IJONIS <hello@ijonis.com> (https://ijonis.com)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ijonis/geo-lint.git"
+    "url": "https://github.com/IJONIS/geo-lint.git"
   },
-  "homepage": "https://github.com/ijonis/geo-lint#readme",
+  "homepage": "https://github.com/IJONIS/geo-lint#readme",
   "bugs": {
-    "url": "https://github.com/ijonis/geo-lint/issues"
+    "url": "https://github.com/IJONIS/geo-lint/issues"
   },
   "keywords": [
     "seo",

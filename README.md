@@ -3,8 +3,8 @@
 **An agentic SEO and GEO linter. AI coding agents run it, read the violations, fix your content, and re-lint -- hands off.**
 
 [![npm version](https://img.shields.io/npm/v/@ijonis/geo-lint)](https://www.npmjs.com/package/@ijonis/geo-lint)
-[![CI](https://img.shields.io/github/actions/workflow/status/ijonis/geo-lint/ci.yml?branch=main&label=CI)](https://github.com/ijonis/geo-lint/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ijonis/geo-lint/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/ijonis/geo-lint/ci.yml?branch=main&label=CI)](https://github.com/IJONIS/geo-lint/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/IJONIS/geo-lint/blob/main/LICENSE)
 
 ---
 
