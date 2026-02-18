@@ -3,7 +3,7 @@
  * Validates content freshness signals, readability, and technical quality
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, LintResult, RuleContext } from '../types.js';
 import type { GeoConfig } from '../config/types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { countWords } from '../utils/word-counter.js';
@@ -63,8 +63,9 @@ export const geoStaleDateReferences: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Update or remove year references older than 18 months; replace with current data',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < FRESHNESS_MIN_WORDS) return [];
@@ -100,8 +101,9 @@ export const geoOutdatedContent: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Review and update content, then set updatedAt to today',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const rawDate = item.updatedAt ?? item.date;
     if (!rawDate) return [];
@@ -146,8 +148,9 @@ export const geoPassiveVoiceExcess: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Rewrite passive sentences in active voice for clearer AI extraction',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < FRESHNESS_MIN_WORDS) return [];
@@ -184,8 +187,9 @@ export const geoSentenceTooLong: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Break long sentences into two or more shorter, focused sentences',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < FRESHNESS_MIN_WORDS) return [];
@@ -227,8 +231,9 @@ export const geoLowInternalLinks: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add 2-3 internal links to related content on the same site',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < FRESHNESS_MIN_WORDS) return [];
@@ -264,8 +269,9 @@ export const geoComparisonTable: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add a comparison table under each heading that discusses comparisons',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < FRESHNESS_MIN_WORDS) return [];

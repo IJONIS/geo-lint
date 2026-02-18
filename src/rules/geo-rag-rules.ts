@@ -3,7 +3,7 @@
  * Validates content patterns that improve retrieval and citation in RAG systems
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, LintResult, RuleContext } from '../types.js';
 import type { GeoConfig } from '../config/types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { countWords } from '../utils/word-counter.js';
@@ -65,8 +65,9 @@ export function createGeoExtractionTriggersRule(triggers: string[]): Rule {
     severity: 'warning',
     category: 'geo',
     fixStrategy: 'Add summary phrases like "In summary", "Key takeaway", or "The main benefit is" to help AI extraction',
-    run: (item: ContentItem): LintResult[] => {
-      if (item.contentType !== 'blog') return [];
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
 
       const wordCount = countWords(item.body);
       if (wordCount < EXTRACTION_TRIGGER_MIN_WORDS) return [];
@@ -111,8 +112,9 @@ export const geoSectionSelfContainment: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Start each section with a specific subject instead of a pronoun like "This" or "It"',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < RAG_MIN_WORDS) return [];
@@ -149,8 +151,9 @@ export function createGeoVagueOpeningRule(fillerPhrases: string[]): Rule {
     severity: 'warning',
     category: 'geo',
     fixStrategy: 'Replace the generic opening with a specific, substantive first sentence',
-    run: (item: ContentItem): LintResult[] => {
-      if (item.contentType !== 'blog') return [];
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
 
       const wordCount = countWords(item.body);
       if (wordCount < RAG_MIN_WORDS) return [];
@@ -216,8 +219,9 @@ export function createGeoAcronymExpansionRule(allowlist: string[]): Rule {
     severity: 'warning',
     category: 'geo',
     fixStrategy: 'Expand each acronym on first use, e.g. "Search Engine Optimization (SEO)"',
-    run: (item: ContentItem): LintResult[] => {
-      if (item.contentType !== 'blog') return [];
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
 
       const wordCount = countWords(item.body);
       if (wordCount < RAG_MIN_WORDS) return [];
@@ -253,8 +257,9 @@ export const geoStatisticWithoutContext: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add source attribution or timeframe context to each statistic',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < RAG_MIN_WORDS) return [];
@@ -289,8 +294,9 @@ export const geoMissingSummarySection: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add a "## TL;DR", "## Key Takeaways", or "## Conclusion" section',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < SUMMARY_MIN_WORDS) return [];

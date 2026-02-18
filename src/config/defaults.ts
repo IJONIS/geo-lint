@@ -59,6 +59,11 @@ export const DEFAULT_CONFIG: Omit<GeoLintConfig, 'siteUrl'> = {
       'Callout', 'CalloutBox', 'Note', 'Warning', 'Tip',
       'CodeBlock', 'Image', 'Video', 'Embed', 'Tabs', 'Tab',
     ],
+    enabledContentTypes: ['blog'],
+  },
+  i18n: {
+    locales: ['de', 'en'],
+    defaultLocale: 'de',
   },
   rules: {},
   thresholds: {

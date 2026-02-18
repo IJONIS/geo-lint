@@ -4,7 +4,7 @@
  * plus answer formatting patterns for AI citation optimization
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, LintResult, RuleContext } from '../types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { countWords } from '../utils/word-counter.js';
 import { extractHeadings } from '../utils/heading-extractor.js';
@@ -32,8 +32,9 @@ export const geoMissingSourceCitations: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add source references using "according to [Source]" or linked citations',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < EEAT_MIN_WORDS) return [];
@@ -61,8 +62,9 @@ export const geoMissingExpertQuotes: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add at least one blockquote with attribution (> "Quote" -- Expert Name)',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < EEAT_LONG_MIN_WORDS) return [];
@@ -88,8 +90,9 @@ export function createGeoMissingAuthorRule(genericNames: string[]): Rule {
     severity: 'warning',
     category: 'geo',
     fixStrategy: 'Set a real author name in frontmatter (not a generic placeholder)',
-    run: (item: ContentItem): LintResult[] => {
-      if (item.contentType !== 'blog') return [];
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
 
       const displayPath = getDisplayPath(item);
 
@@ -135,8 +138,9 @@ export function createGeoHeadingTooVagueRule(vagueHeadings: string[]): Rule {
     severity: 'warning',
     category: 'geo',
     fixStrategy: 'Replace vague headings with specific, descriptive headings of 3+ words',
-    run: (item: ContentItem): LintResult[] => {
-      if (item.contentType !== 'blog') return [];
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
 
       const wordCount = countWords(item.body);
       if (wordCount < EEAT_MIN_WORDS) return [];
@@ -175,8 +179,9 @@ export const geoFaqQuality: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Improve FAQ section: add 3+ Q&A pairs, use question marks, keep answers 20-150 words',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < EEAT_LONG_MIN_WORDS) return [];
@@ -243,8 +248,9 @@ export const geoDefinitionPattern: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Start definition sections with "[Subject] is/are..." for AI extraction',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < EEAT_MIN_WORDS) return [];
@@ -301,8 +307,9 @@ export const geoHowtoSteps: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add a numbered list with 3+ steps to how-to sections',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < EEAT_MIN_WORDS) return [];
@@ -353,8 +360,9 @@ export const geoMissingTldr: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add a TL;DR, "Key Takeaway", or bold blockquote summary near the top of the article',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < EEAT_LONG_MIN_WORDS) return [];

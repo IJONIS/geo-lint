@@ -81,6 +81,7 @@ export function mergeWithDefaults(user: GeoLintUserConfig): GeoLintConfig {
       brandName: user.geo?.brandName ?? DEFAULT_CONFIG.geo.brandName,
       brandCity: user.geo?.brandCity ?? DEFAULT_CONFIG.geo.brandCity,
       keywordsPath: user.geo?.keywordsPath ?? DEFAULT_CONFIG.geo.keywordsPath,
+      enabledContentTypes: user.geo?.enabledContentTypes ?? DEFAULT_CONFIG.geo.enabledContentTypes,
       fillerPhrases: user.geo?.fillerPhrases ?? DEFAULT_CONFIG.geo.fillerPhrases,
       extractionTriggers: user.geo?.extractionTriggers ?? DEFAULT_CONFIG.geo.extractionTriggers,
       acronymAllowlist: user.geo?.acronymAllowlist ?? DEFAULT_CONFIG.geo.acronymAllowlist,
@@ -88,12 +89,17 @@ export function mergeWithDefaults(user: GeoLintUserConfig): GeoLintConfig {
       genericAuthorNames: user.geo?.genericAuthorNames ?? DEFAULT_CONFIG.geo.genericAuthorNames,
       allowedHtmlTags: user.geo?.allowedHtmlTags ?? DEFAULT_CONFIG.geo.allowedHtmlTags,
     },
+    i18n: {
+      locales: user.i18n?.locales ?? DEFAULT_CONFIG.i18n.locales,
+      defaultLocale: user.i18n?.defaultLocale ?? DEFAULT_CONFIG.i18n.defaultLocale,
+    },
     rules: { ...DEFAULT_CONFIG.rules, ...(user.rules ?? {}) },
     thresholds: {
       title: { ...DEFAULT_CONFIG.thresholds.title, ...(user.thresholds?.title ?? {}) },
       description: { ...DEFAULT_CONFIG.thresholds.description, ...(user.thresholds?.description ?? {}) },
       slug: { ...DEFAULT_CONFIG.thresholds.slug, ...(user.thresholds?.slug ?? {}) },
       content: { ...DEFAULT_CONFIG.thresholds.content, ...(user.thresholds?.content ?? {}) },
+      byContentType: user.thresholds?.byContentType,
     },
   };
 }

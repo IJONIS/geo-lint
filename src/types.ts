@@ -68,6 +68,10 @@ export interface RuleContext {
   validSlugs: Set<string>;
   /** Set of all valid image paths */
   validImages: Set<string>;
+  /** Resolved threshold config (optional for backward compat) */
+  thresholds?: import('./config/types.js').ThresholdConfig;
+  /** Content types that GEO rules run on (defaults to ['blog'] when absent) */
+  geoEnabledContentTypes?: ContentType[];
 }
 
 /**

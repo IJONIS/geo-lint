@@ -18,7 +18,7 @@ import { ogRules } from './og-rules.js';
 import { performanceRules } from './performance-rules.js';
 import { robotsRules } from './robots-rules.js';
 import { slugRules } from './slug-rules.js';
-import { i18nRules } from './i18n-rules.js';
+import { createI18nRules } from './i18n-rules.js';
 import { dateRules } from './date-rules.js';
 import { schemaRules } from './schema-rules.js';
 import { keywordCoherenceRules } from './keyword-coherence-rules.js';
@@ -55,7 +55,7 @@ export function buildRules(config: GeoLintConfig, linkExtractor: LinkExtractor):
     ...createOrphanRules(linkExtractor),
     ...robotsRules,
     ...slugRules,
-    ...i18nRules,
+    ...createI18nRules(config.i18n),
     ...dateRules,
     ...(config.categories.length > 0 ? createCategoryRules(config.categories) : []),
     ...schemaRules,
@@ -145,7 +145,7 @@ export { ogRules } from './og-rules.js';
 export { performanceRules } from './performance-rules.js';
 export { robotsRules } from './robots-rules.js';
 export { slugRules } from './slug-rules.js';
-export { i18nRules } from './i18n-rules.js';
+export { i18nRules, createI18nRules } from './i18n-rules.js';
 export { dateRules } from './date-rules.js';
 export { schemaRules } from './schema-rules.js';
 export { keywordCoherenceRules } from './keyword-coherence-rules.js';

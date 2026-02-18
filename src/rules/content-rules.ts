@@ -3,14 +3,14 @@
  * Validates word count and readability
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, RuleContext, LintResult } from '../types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { countWords } from '../utils/word-counter.js';
 import { calculateReadability, isReadable } from '../utils/readability.js';
+import { resolveThresholds } from '../utils/resolve-thresholds.js';
 
-/** Default content thresholds */
-const MIN_WORD_COUNT = 300;
-const MIN_READABILITY_SCORE = 30;
+/** Default content thresholds (used when context has no thresholds) */
+const CONTENT_DEFAULTS = { minWordCount: 300, minReadabilityScore: 30 };
 
 /**
  * Rule: Content should have minimum word count
@@ -20,16 +20,19 @@ export const contentTooShort: Rule = {
   severity: 'warning',
   category: 'content',
   fixStrategy: 'Expand the content for better SEO performance',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const c = context.thresholds
+      ? resolveThresholds(context.thresholds, item.contentType).content
+      : CONTENT_DEFAULTS;
     const wordCount = countWords(item.body);
 
-    if (wordCount < MIN_WORD_COUNT) {
+    if (wordCount < c.minWordCount) {
       return [{
         file: getDisplayPath(item),
         field: 'body',
         rule: 'content-too-short',
         severity: 'warning',
-        message: `Content is too short (${wordCount} words, minimum ${MIN_WORD_COUNT})`,
+        message: `Content is too short (${wordCount} words, minimum ${c.minWordCount})`,
         suggestion: 'Consider expanding the content for better SEO performance',
       }];
     }
@@ -45,17 +48,19 @@ export const lowReadability: Rule = {
   severity: 'warning',
   category: 'content',
   fixStrategy: 'Use shorter sentences for easier reading',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     const wordCount = countWords(item.body);
 
-    // Skip readability check for very short content
     if (wordCount < 100) {
       return [];
     }
 
+    const c = context.thresholds
+      ? resolveThresholds(context.thresholds, item.contentType).content
+      : CONTENT_DEFAULTS;
     const readability = calculateReadability(item.body);
 
-    if (!isReadable(readability.score, MIN_READABILITY_SCORE)) {
+    if (!isReadable(readability.score, c.minReadabilityScore)) {
       return [{
         file: getDisplayPath(item),
         field: 'body',

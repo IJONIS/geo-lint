@@ -74,6 +74,8 @@ export async function lint(options: LintOptions = {}): Promise<number> {
     allContent: contentItems,
     validSlugs: buildSlugRegistry(contentItems, config.staticRoutes, config.contentPaths),
     validImages: buildImageRegistry(config.imageDirectories),
+    thresholds: config.thresholds,
+    geoEnabledContentTypes: config.geo.enabledContentTypes ?? ['blog'],
   };
 
   if (isPretty) {
@@ -137,6 +139,8 @@ export async function lintQuiet(options: LintOptions = {}): Promise<LintResult[]
     allContent: contentItems,
     validSlugs: buildSlugRegistry(contentItems, config.staticRoutes, config.contentPaths),
     validImages: buildImageRegistry(config.imageDirectories),
+    thresholds: config.thresholds,
+    geoEnabledContentTypes: config.geo.enabledContentTypes ?? ['blog'],
   };
 
   const rules = buildRules(config, linkExtractor);
@@ -151,6 +155,7 @@ export type {
   GeoConfig,
   ContentPathConfig,
   ThresholdConfig,
+  I18nConfig,
 } from './config/types.js';
 export type {
   LintResult,

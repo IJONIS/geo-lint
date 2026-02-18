@@ -3,7 +3,7 @@
  * Validates content readiness for LLM-based search and AI visibility
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, LintResult, RuleContext } from '../types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { countWords } from '../utils/word-counter.js';
 import { extractHeadings } from '../utils/heading-extractor.js';
@@ -56,8 +56,9 @@ export const geoNoQuestionHeadings: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Rephrase some headings as questions (e.g., "How does X work?")',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < GEO_MIN_WORDS) return [];
@@ -94,8 +95,9 @@ export const geoWeakLeadSentences: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Start each section with a concise factual sentence that directly answers the heading',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < GEO_MIN_WORDS) return [];
@@ -130,8 +132,9 @@ export const geoLowCitationDensity: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add statistics, percentages, or concrete numbers to increase citation potential',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < GEO_MIN_WORDS) return [];
@@ -163,8 +166,9 @@ export const geoMissingFaqSection: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add an "## FAQ" or "## Frequently Asked Questions" section with Q&A pairs',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < FAQ_MIN_WORDS) return [];
@@ -194,8 +198,9 @@ export const geoMissingTable: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add a comparison table, feature matrix, or data summary table',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < TABLE_MIN_WORDS) return [];
@@ -226,8 +231,9 @@ export const geoShortCitationBlocks: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Start each section with a 40-60 word paragraph that directly answers the heading',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < CITATION_BLOCK_MIN_WORDS) return [];
@@ -264,8 +270,9 @@ export function createGeoEntityRule(brandName: string, brandCity: string): Rule 
     severity: 'warning',
     category: 'geo',
     fixStrategy: 'Mention brand name and location naturally in the content body',
-    run: (item: ContentItem): LintResult[] => {
-      if (item.contentType !== 'blog') return [];
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
 
       const wordCount = countWords(item.body);
       if (wordCount < ENTITY_MIN_WORDS) return [];

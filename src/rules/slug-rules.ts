@@ -3,11 +3,12 @@
  * Validates slug format and length for SEO-friendly URLs
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, RuleContext, LintResult } from '../types.js';
 import { getDisplayPath } from '../utils/display-path.js';
+import { resolveThresholds } from '../utils/resolve-thresholds.js';
 
-/** Default slug thresholds */
-const SLUG_MAX_LENGTH = 75;
+/** Default slug threshold (used when context has no thresholds) */
+const SLUG_DEFAULTS = { maxLength: 75 };
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
@@ -46,18 +47,21 @@ export const slugTooLong: Rule = {
   severity: 'warning',
   category: 'seo',
   fixStrategy: 'Shorten the slug for better URL readability',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     if (!item.slug) return [];
 
+    const s = context.thresholds
+      ? resolveThresholds(context.thresholds, item.contentType).slug
+      : SLUG_DEFAULTS;
     const length = item.slug.length;
-    if (length > SLUG_MAX_LENGTH) {
+    if (length > s.maxLength) {
       return [{
         file: getDisplayPath(item),
         field: 'slug',
         rule: 'slug-too-long',
         severity: 'warning',
-        message: `Slug is too long (${length}/${SLUG_MAX_LENGTH} chars)`,
-        suggestion: `Shorten the slug to ${SLUG_MAX_LENGTH} characters or less for better URL readability`,
+        message: `Slug is too long (${length}/${s.maxLength} chars)`,
+        suggestion: `Shorten the slug to ${s.maxLength} characters or less for better URL readability`,
       }];
     }
     return [];

@@ -3,13 +3,12 @@
  * Validates title presence and length
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, RuleContext, LintResult } from '../types.js';
 import { getDisplayPath } from '../utils/display-path.js';
+import { resolveThresholds } from '../utils/resolve-thresholds.js';
 
-/** Default title length thresholds */
-const TITLE_MIN_LENGTH = 30;
-const TITLE_MAX_LENGTH = 60;
-const TITLE_WARN_LENGTH = 55;
+/** Default title length thresholds (used when context has no thresholds) */
+const TITLE_DEFAULTS = { minLength: 30, maxLength: 60, warnLength: 55 };
 
 /**
  * Rule: Title must be present
@@ -42,18 +41,21 @@ export const titleTooShort: Rule = {
   severity: 'warning',
   category: 'seo',
   fixStrategy: 'Expand the title to meet minimum length',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     if (!item.title) return [];
 
+    const t = context.thresholds
+      ? resolveThresholds(context.thresholds, item.contentType).title
+      : TITLE_DEFAULTS;
     const length = item.title.length;
-    if (length > 0 && length < TITLE_MIN_LENGTH) {
+    if (length > 0 && length < t.minLength) {
       return [{
         file: getDisplayPath(item),
         field: 'title',
         rule: 'title-too-short',
         severity: 'warning',
-        message: `Title is too short (${length}/${TITLE_MIN_LENGTH} chars minimum)`,
-        suggestion: `Expand the title to at least ${TITLE_MIN_LENGTH} characters for better SEO`,
+        message: `Title is too short (${length}/${t.minLength} chars minimum)`,
+        suggestion: `Expand the title to at least ${t.minLength} characters for better SEO`,
       }];
     }
     return [];
@@ -68,18 +70,21 @@ export const titleTooLong: Rule = {
   severity: 'error',
   category: 'seo',
   fixStrategy: 'Shorten the title to avoid truncation in search results',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     if (!item.title) return [];
 
+    const t = context.thresholds
+      ? resolveThresholds(context.thresholds, item.contentType).title
+      : TITLE_DEFAULTS;
     const length = item.title.length;
-    if (length > TITLE_MAX_LENGTH) {
+    if (length > t.maxLength) {
       return [{
         file: getDisplayPath(item),
         field: 'title',
         rule: 'title-too-long',
         severity: 'error',
-        message: `Title is too long (${length}/${TITLE_MAX_LENGTH} chars)`,
-        suggestion: `Shorten the title to ${TITLE_MAX_LENGTH} characters or less to avoid truncation in search results`,
+        message: `Title is too long (${length}/${t.maxLength} chars)`,
+        suggestion: `Shorten the title to ${t.maxLength} characters or less to avoid truncation in search results`,
       }];
     }
     return [];
@@ -94,18 +99,20 @@ export const titleApproachingLimit: Rule = {
   severity: 'warning',
   category: 'seo',
   fixStrategy: 'Consider shortening to leave room for site name suffix',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     if (!item.title) return [];
 
+    const t = context.thresholds
+      ? resolveThresholds(context.thresholds, item.contentType).title
+      : TITLE_DEFAULTS;
     const length = item.title.length;
-    // Only warn if it's close to but not over the limit
-    if (length > TITLE_WARN_LENGTH && length <= TITLE_MAX_LENGTH) {
+    if (length > t.warnLength && length <= t.maxLength) {
       return [{
         file: getDisplayPath(item),
         field: 'title',
         rule: 'title-approaching-limit',
         severity: 'warning',
-        message: `Title is approaching maximum length (${length}/${TITLE_MAX_LENGTH} chars)`,
+        message: `Title is approaching maximum length (${length}/${t.maxLength} chars)`,
         suggestion: 'Consider shortening to leave room for site name suffix in search results',
       }];
     }

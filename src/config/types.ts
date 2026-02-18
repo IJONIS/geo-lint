@@ -2,6 +2,8 @@
  * @ijonis/geo-lint Configuration Types
  */
 
+import type { ContentType } from '../types.js';
+
 /** Content directory configuration */
 export interface ContentPathConfig {
   /** Relative path from project root, e.g. 'content/blog' */
@@ -22,6 +24,8 @@ export interface GeoConfig {
   brandCity: string;
   /** Path to geo-keywords markdown file, relative to project root. Empty = skip */
   keywordsPath: string;
+  /** Content types that GEO rules run on. Defaults to ['blog'] */
+  enabledContentTypes?: ContentType[];
   /** Filler phrases flagged in article openings (vague-opening rule) */
   fillerPhrases?: string[];
   /** Summary/takeaway trigger phrases (extraction-triggers rule) */
@@ -34,6 +38,14 @@ export interface GeoConfig {
   genericAuthorNames?: string[];
   /** MDX component tags allowed in markdown (not flagged by inline-html rule) */
   allowedHtmlTags?: string[];
+}
+
+/** Internationalization configuration */
+export interface I18nConfig {
+  /** All supported locale codes, e.g. ['de', 'en', 'fr'] */
+  locales: string[];
+  /** Default locale — maps to hreflang x-default. Must be in locales array */
+  defaultLocale: string;
 }
 
 /** User-facing configuration (partial, with defaults applied) */
@@ -54,6 +66,8 @@ export interface GeoLintUserConfig {
   excludeCategories?: string[];
   /** GEO-specific configuration */
   geo?: Partial<GeoConfig>;
+  /** Internationalization configuration */
+  i18n?: Partial<I18nConfig>;
   /** Rule severity overrides: 'off' disables a rule */
   rules?: Record<string, 'error' | 'warning' | 'off'>;
   /** Threshold overrides */
@@ -66,6 +80,8 @@ export interface ThresholdConfig {
   description: { minLength: number; maxLength: number; warnLength: number };
   slug: { maxLength: number };
   content: { minWordCount: number; minReadabilityScore: number };
+  /** Per-content-type threshold overrides, merged on top of base values */
+  byContentType?: Partial<Record<ContentType, Partial<Omit<ThresholdConfig, 'byContentType'>>>>;
 }
 
 /** Fully resolved configuration with all defaults applied */
@@ -78,6 +94,7 @@ export interface GeoLintConfig {
   excludeSlugs: string[];
   excludeCategories: string[];
   geo: GeoConfig;
+  i18n: I18nConfig;
   rules: Record<string, 'error' | 'warning' | 'off'>;
   thresholds: ThresholdConfig;
 }

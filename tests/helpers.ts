@@ -21,6 +21,13 @@ export function createContext(overrides: Partial<RuleContext> = {}): RuleContext
     allContent: [],
     validSlugs: new Set<string>(['/blog/test-post', '/about', '/contact']),
     validImages: new Set<string>(['/images/test.jpg']),
+    thresholds: {
+      title: { minLength: 30, maxLength: 60, warnLength: 55 },
+      description: { minLength: 70, maxLength: 160, warnLength: 150 },
+      slug: { maxLength: 75 },
+      content: { minWordCount: 300, minReadabilityScore: 30 },
+    },
+    geoEnabledContentTypes: ['blog'],
     ...overrides,
   };
 }

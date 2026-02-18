@@ -3,7 +3,7 @@
  * Validates content structure and formatting patterns for AI extraction
  */
 
-import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { Rule, ContentItem, LintResult, RuleContext } from '../types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { countWords } from '../utils/word-counter.js';
 import {
@@ -58,8 +58,9 @@ export const geoSectionTooLong: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Break long sections into sub-sections with H3 headings every 200-300 words',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_MIN_WORDS) return [];
@@ -98,8 +99,9 @@ export const geoParagraphTooLong: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Split paragraphs longer than 100 words into shorter focused paragraphs',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_MIN_WORDS) return [];
@@ -137,8 +139,9 @@ export const geoMissingLists: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add at least one bulleted or numbered list to improve scannability and AI extraction',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_MIN_WORDS) return [];
@@ -167,8 +170,9 @@ export const geoCitationBlockUpperBound: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Keep the first paragraph after each heading under 80 words for optimal AI extraction',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_LONG_MIN_WORDS) return [];
@@ -214,8 +218,9 @@ export const geoOrphanedIntro: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Shorten the introduction to under 150 words or add a heading to break it up',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_MIN_WORDS) return [];
@@ -248,8 +253,9 @@ export const geoHeadingDensity: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add headings so that no text gap exceeds 300 words without a heading',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_LONG_MIN_WORDS) return [];
@@ -286,8 +292,9 @@ export const geoStructuralElementRatio: Rule = {
   severity: 'warning',
   category: 'geo',
   fixStrategy: 'Add structural elements (lists, tables, blockquotes, code blocks) for better AI extraction',
-  run: (item: ContentItem): LintResult[] => {
-    if (item.contentType !== 'blog') return [];
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
+    const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+    if (!geoTypes.includes(item.contentType)) return [];
 
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_MIN_WORDS) return [];
