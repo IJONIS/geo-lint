@@ -45,7 +45,6 @@
   },
   "files": [
     "dist",
-    "docs",
     "LICENSE",
     "README.md",
     "CHANGELOG.md"
@@ -57,7 +56,6 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
