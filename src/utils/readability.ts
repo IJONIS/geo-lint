@@ -13,7 +13,7 @@ import { stripMarkdown, countWords, countSentences } from './word-counter.js';
  * This is a simplified heuristic based on vowel patterns
  * Works reasonably well for German text
  */
-function estimateSyllables(word: string): number {
+export function estimateSyllables(word: string): number {
   // Lowercase for comparison
   const lower = word.toLowerCase();
 

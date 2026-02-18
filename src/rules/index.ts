@@ -37,6 +37,9 @@ import { geoStructureRules } from './geo-structure-rules.js';
 import { createGeoFreshnessRules } from './geo-freshness-rules.js';
 import { createGeoRagRules } from './geo-rag-rules.js';
 
+// Content quality rules
+import { contentQualityRules } from './content-quality-rules.js';
+
 /**
  * Build the complete rule set from config and link extractor
  */
@@ -66,6 +69,7 @@ export function buildRules(config: GeoLintConfig, linkExtractor: LinkExtractor):
     ...createGeoRagRules(config.geo),
     ...keywordCoherenceRules,
     ...createCanonicalRules(config.siteUrl),
+    ...contentQualityRules,
   ];
 
   // Apply user rule overrides (severity changes + disabling)
@@ -164,3 +168,6 @@ export { geoEeatStaticRules, createGeoEeatRules } from './geo-eeat-rules.js';
 export { geoStructureRules } from './geo-structure-rules.js';
 export { geoFreshnessStaticRules, createGeoFreshnessRules } from './geo-freshness-rules.js';
 export { geoRagStaticRules, createGeoRagRules } from './geo-rag-rules.js';
+
+// Content quality rule re-exports
+export { contentQualityRules } from './content-quality-rules.js';

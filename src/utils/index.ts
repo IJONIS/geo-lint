@@ -12,3 +12,5 @@ export * from './link-extractor.js';
 export * from './geo-keywords.js';
 export * from './slug-resolver.js';
 export * from './display-path.js';
+export * from './content-quality-analyzer.js';
+export * from './word-complexity.js';

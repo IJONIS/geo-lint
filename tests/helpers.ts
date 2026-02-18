@@ -89,7 +89,7 @@ export function generateGeoBody(options: {
   }
 
   if (includeFaq) {
-    sections.push('## FAQ\n\n### What is this about?\nThis is about testing.\n\n### How does it work?\nIt works by validating content.');
+    sections.push('## FAQ\n\n### What is this about?\nThis is about testing content quality and ensuring that your articles meet the standards required for search engine optimization and generative engine visibility.\n\n### How does it work?\nIt works by validating content against a comprehensive set of rules that check structure, readability, citations, headings, and other quality signals important for AI search.\n\n### Why should I use it?\nYou should use it because it helps you identify and fix content issues before publishing, improving your chances of being cited by AI search engines and featured in generated answers.');
   }
 
   if (includeTable) {

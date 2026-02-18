@@ -16,6 +16,10 @@ import {
   countEntityMentions,
   analyzeCitationBlocks,
 } from '../utils/geo-analyzer.js';
+import {
+  analyzeCitationQuality,
+  analyzeFaqQuality,
+} from '../utils/content-quality-analyzer.js';
 
 /** Minimum word count before GEO rules apply */
 const GEO_MIN_WORDS = 500;
@@ -131,7 +135,7 @@ export const geoLowCitationDensity: Rule = {
   name: 'geo-low-citation-density',
   severity: 'warning',
   category: 'geo',
-  fixStrategy: 'Add statistics, percentages, or concrete numbers to increase citation potential',
+  fixStrategy: 'Add statistics with source attribution (e.g., "According to [Study], 73% of...")',
   run: (item: ContentItem, context: RuleContext): LintResult[] => {
     const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
     if (!geoTypes.includes(item.contentType)) return [];
@@ -153,6 +157,22 @@ export const geoLowCitationDensity: Rule = {
       }];
     }
 
+    // Stats exist — check whether they have source attribution
+    const citationQuality = analyzeCitationQuality(item.body);
+    if (citationQuality.totalStats > 0 && citationQuality.unattributedStats > 0) {
+      const ratio = citationQuality.attributedStats / citationQuality.totalStats;
+      if (ratio < 0.5) {
+        return [{
+          file: getDisplayPath(item),
+          field: 'body',
+          rule: 'geo-low-citation-density',
+          severity: 'warning',
+          message: `${citationQuality.unattributedStats}/${citationQuality.totalStats} statistics lack source attribution`,
+          suggestion: 'Add sources for your statistics (e.g., "According to [Study Name]...", link to source, or footnote). Unsourced stats reduce credibility for AI citation.',
+        }];
+      }
+    }
+
     return [];
   },
 };
@@ -165,7 +185,7 @@ export const geoMissingFaqSection: Rule = {
   name: 'geo-missing-faq-section',
   severity: 'warning',
   category: 'geo',
-  fixStrategy: 'Add an "## FAQ" or "## Frequently Asked Questions" section with Q&A pairs',
+  fixStrategy: 'Add an "## FAQ" or "## Frequently Asked Questions" section with 3+ Q&A pairs (min 20 words each)',
   run: (item: ContentItem, context: RuleContext): LintResult[] => {
     const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
     if (!geoTypes.includes(item.contentType)) return [];
@@ -184,7 +204,34 @@ export const geoMissingFaqSection: Rule = {
       }];
     }
 
-    return [];
+    // FAQ section exists — validate its quality
+    const faqQuality = analyzeFaqQuality(item.body);
+
+    const results: LintResult[] = [];
+
+    if (faqQuality.questionCount < 3) {
+      results.push({
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'geo-missing-faq-section',
+        severity: 'warning',
+        message: `FAQ section has only ${faqQuality.questionCount} question(s) — aim for at least 3`,
+        suggestion: 'Add more Q&A pairs to your FAQ section. LLMs prefer comprehensive FAQ sections with at least 3 questions.',
+      });
+    }
+
+    if (faqQuality.shortAnswers > 0) {
+      results.push({
+        file: getDisplayPath(item),
+        field: 'body',
+        rule: 'geo-missing-faq-section',
+        severity: 'warning',
+        message: `${faqQuality.shortAnswers} FAQ answer(s) are too short (under 20 words, avg: ${Math.round(faqQuality.avgAnswerWordCount)} words)`,
+        suggestion: 'Expand FAQ answers to at least 20 words each. Short one-line answers provide little value to AI citation engines.',
+      });
+    }
+
+    return results;
   },
 };
 

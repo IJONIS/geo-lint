@@ -61,13 +61,17 @@ export const lowReadability: Rule = {
     const readability = calculateReadability(item.body);
 
     if (!isReadable(readability.score, c.minReadabilityScore)) {
+      /** Escalate to error for extremely unreadable content (score < 20) */
+      const isExtreme = readability.score < 20;
+      const severity = isExtreme ? 'error' : 'warning';
+
       return [{
         file: getDisplayPath(item),
         field: 'body',
         rule: 'low-readability',
-        severity: 'warning',
-        message: `Low readability score (${readability.score}/100 - ${readability.interpretation})`,
-        suggestion: `Avg sentence length: ${readability.avgSentenceLength} words. Consider shorter sentences for easier reading.`,
+        severity,
+        message: `${isExtreme ? 'Extremely low' : 'Low'} readability score (${readability.score}/100 - ${readability.interpretation})`,
+        suggestion: `Avg sentence length: ${readability.avgSentenceLength} words. ${isExtreme ? 'Content is nearly unreadable. Drastically simplify sentence structure and vocabulary.' : 'Consider shorter sentences for easier reading.'}`,
       }];
     }
     return [];
