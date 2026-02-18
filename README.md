@@ -1,6 +1,6 @@
 # @ijonis/geo-lint
 
-**The first open-source linter that checks your content for AI search visibility.**
+**An agentic SEO and GEO linter. AI coding agents run it, read the violations, fix your content, and re-lint -- hands off.**
 
 [![npm version](https://img.shields.io/npm/v/@ijonis/geo-lint)](https://www.npmjs.com/package/@ijonis/geo-lint)
 [![CI](https://img.shields.io/github/actions/workflow/status/ijonis/geo-lint/ci.yml?branch=main&label=CI)](https://github.com/ijonis/geo-lint/actions)
@@ -8,23 +8,35 @@
 
 ---
 
-## What is GEO?
+## Why this exists
 
-**GEO stands for Generative Engine Optimization** -- the practice of optimizing content so it gets cited by AI search engines like ChatGPT, Perplexity, Google AI Overviews, and Gemini. When a user asks an AI assistant a question, the model pulls from web content to construct its answer. GEO is about making your content the source it pulls from.
+Traditional SEO tools give you a report. You read it, figure out what to change, edit the file, re-run, repeat. That loop is manual, slow, and breaks down at scale.
 
-Traditional SEO focuses on ranking in search result lists. GEO focuses on being **cited in AI-generated answers**. The two are complementary, not competing -- but GEO requires structural changes to your content that traditional SEO tools do not check for. `@ijonis/geo-lint` validates both, with dedicated rules for each.
+`@ijonis/geo-lint` is built for a different loop:
+
+```
+Agent runs geo-lint → reads JSON violations → fixes the content → re-runs geo-lint → done
+```
+
+**You don't fix the violations. Your AI agent does.** The linter is the rule engine that tells the agent exactly what's wrong and how to fix it. Every rule ships with a machine-readable `fixStrategy` and a `suggestion` field that agents consume directly. The JSON output has zero ANSI formatting -- pure structured data.
+
+This works today with Claude Code, Cursor, Windsurf, Copilot, or any agent that can run shell commands and edit files.
+
+### What about GEO?
+
+**GEO (Generative Engine Optimization)** is the practice of optimizing content so it gets cited by AI search engines -- ChatGPT, Perplexity, Google AI Overviews, Gemini. When someone asks an AI a question, the model pulls from web content to build its answer. GEO makes your content the source it pulls from.
+
+Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. They're complementary, but GEO requires structural changes that no existing SEO tool checks for. `@ijonis/geo-lint` validates both -- 46 SEO rules and **7 dedicated GEO rules** that have zero open-source alternatives.
 
 ---
 
 ## Quick Start
 
-Install the package:
-
 ```bash
 npm install -D @ijonis/geo-lint
 ```
 
-Create a `geo-lint.config.ts` in your project root:
+Create `geo-lint.config.ts`:
 
 ```typescript
 import { defineConfig } from '@ijonis/geo-lint';
@@ -39,17 +51,19 @@ export default defineConfig({
 });
 ```
 
-Run the linter:
+Run it manually:
 
 ```bash
 npx geo-lint
 ```
 
+Or let your agent handle it -- see [Agent Integration](#agent-integration) below.
+
 ---
 
 ## The 7 GEO Rules
 
-These rules are what make `@ijonis/geo-lint` different from any existing content linter. Each one targets a specific pattern that AI search engines use when selecting content to cite.
+No other open-source linter checks for these. Each rule targets a specific content pattern that AI search engines use when deciding what to cite. When your agent fixes a GEO violation, it's directly increasing the probability that the content gets pulled into AI-generated answers.
 
 ### 1. `geo-no-question-headings`
 
@@ -380,20 +394,45 @@ headquarters, using modern frameworks and cloud infrastructure.
 
 ## Agent Integration
 
-`@ijonis/geo-lint` is designed for an **agentic workflow** where AI coding agents (Claude Code, Cursor, Copilot, etc.) run the linter, fix violations, and re-lint automatically. Two features make this possible:
+This is what `@ijonis/geo-lint` is built for. The linter isn't a reporting tool you read -- it's a **rule engine that governs your AI agent**. The agent runs the linter, reads the structured output, fixes every violation, and re-runs until the content is clean. You don't touch the content.
 
-1. **Structured JSON output** -- no ANSI color codes to parse
-2. **Fix strategies on every rule** -- machine-readable instructions for how to resolve each violation
+### How it works
 
-### JSON Output
+```
+┌─────────────────────────────────────────────────┐
+│  You: "Optimize my blog posts for AI search"    │
+└──────────────────┬──────────────────────────────┘
+                   ▼
+┌─────────────────────────────────────────────────┐
+│  Agent runs: npx geo-lint --format=json         │
+│  ← Gets structured violations with fix guidance │
+└──────────────────┬──────────────────────────────┘
+                   ▼
+┌─────────────────────────────────────────────────┐
+│  Agent reads each violation's `suggestion`      │
+│  Opens the file, applies the fix, saves it      │
+└──────────────────┬──────────────────────────────┘
+                   ▼
+┌─────────────────────────────────────────────────┐
+│  Agent re-runs: npx geo-lint --format=json      │
+│  Loops until violations = 0                     │
+└──────────────────┬──────────────────────────────┘
+                   ▼
+┌─────────────────────────────────────────────────┐
+│  Done. Content is GEO-optimized.                │
+└─────────────────────────────────────────────────┘
+```
 
-Run with `--format=json` to get structured results:
+The entire loop is hands-off. Every rule includes:
+- **`suggestion`** -- a plain-language instruction the agent follows to fix the violation
+- **`fixStrategy`** -- a machine-readable fix description for the rule itself
+- **`file`, `field`, `line`** -- exact location so the agent edits the right place
+
+### JSON output (what the agent reads)
 
 ```bash
 npx geo-lint --format=json
 ```
-
-Output:
 
 ```json
 [
@@ -402,29 +441,29 @@ Output:
     "field": "body",
     "rule": "geo-no-question-headings",
     "severity": "warning",
-    "message": "Only 1/5 (20%) H2/H3 headings are question-formatted — aim for at least 20%",
-    "suggestion": "Rephrase some headings as questions (e.g., \"How does X work?\" / \"Was ist X?\") to improve LLM snippet extraction."
+    "message": "Only 1/5 (20%) H2/H3 headings are question-formatted",
+    "suggestion": "Rephrase some headings as questions (e.g., 'How does X work?') to improve LLM snippet extraction."
   },
   {
     "file": "blog/my-post",
     "field": "body",
     "rule": "geo-missing-table",
     "severity": "warning",
-    "message": "No data table found in long-form content (tables increase AI citation rates by 2.5x)",
+    "message": "No data table found in long-form content",
     "suggestion": "Add a comparison table, feature matrix, or data summary table."
   }
 ]
 ```
 
-### Rule Discovery
+No ANSI colors. No human-friendly formatting. Pure structured data that any agent can parse and act on.
 
-Agents can discover all available rules and their fix strategies at runtime:
+### Rule discovery (agent bootstrapping)
+
+Before fixing anything, an agent can learn every rule and its fix strategy in one call:
 
 ```bash
 npx geo-lint --rules
 ```
-
-Output:
 
 ```json
 [
@@ -432,34 +471,17 @@ Output:
     "name": "geo-no-question-headings",
     "severity": "warning",
     "category": "geo",
-    "fixStrategy": "Rephrase some headings as questions (e.g., \"How does X work?\")"
-  },
-  {
-    "name": "title-too-long",
-    "severity": "error",
-    "category": "seo",
-    "fixStrategy": "Shorten the title to avoid truncation in search results"
+    "fixStrategy": "Rephrase some headings as questions (e.g., 'How does X work?')"
   }
 ]
 ```
 
-### Agentic Workflow
+### Drop-in Claude Code skill
 
-The intended workflow for AI coding agents:
-
-```
-1. Run:    npx geo-lint --format=json
-2. Parse:  Read JSON results array
-3. Fix:    For each violation, read the file and apply the fix
-           based on the rule's fixStrategy
-4. Re-run: npx geo-lint --format=json
-5. Repeat: Loop until the results array is empty
-```
-
-A minimal Claude Code skill that implements this pattern:
+Add this to your project's `.claude/skills/` and the agent will optimize your content autonomously:
 
 ```markdown
-## Lint and Fix Workflow
+## GEO Lint & Fix
 
 1. Run `npx geo-lint --format=json` and capture output
 2. Parse the JSON array of violations
@@ -467,13 +489,13 @@ A minimal Claude Code skill that implements this pattern:
 4. For each file:
    - Read the MDX file
    - For each violation, apply the fix described in `suggestion`
-   - Write the updated file
+   - Preserve the author's voice -- don't rewrite, restructure
 5. Re-run `npx geo-lint --format=json`
-6. If violations remain, repeat from step 3
-7. Report final results
+6. If violations remain, repeat from step 4 (max 3 passes)
+7. Report: files changed, violations fixed, any remaining issues
 ```
 
-Every rule includes a `fixStrategy` field that describes the fix in plain language. Agents can use this to determine the correct remediation without needing rule-specific logic.
+Works with **Claude Code**, **Cursor**, **Windsurf**, **Copilot**, or any agent that can run shell commands and edit files.
 
 ---
 
@@ -667,4 +689,4 @@ Options:
 
 ---
 
-Built by [IJONIS](https://ijonis.com) -- a digital agency specializing in AI visibility and GEO strategy.
+Built by [IJONIS](https://ijonis.com) -- we help companies become visible to AI search engines. This linter is extracted from the same toolchain we use on production client content.
