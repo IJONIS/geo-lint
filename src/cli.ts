@@ -5,10 +5,16 @@
  * Command-line interface for the SEO/GEO content linter
  */
 
+import { createRequire } from 'node:module';
 import { lint } from './index.js';
 import { loadConfig } from './config/loader.js';
+import { DEFAULT_CONFIG } from './config/defaults.js';
 import { buildRules } from './rules/index.js';
+import type { GeoLintConfig } from './config/types.js';
 import { createLinkExtractor } from './utils/link-extractor.js';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json') as { version: string };
 
 const args = process.argv.slice(2);
 
@@ -46,30 +52,30 @@ Examples:
 }
 
 function printVersion(): void {
-  // Read version from package.json at build time
-  console.log('0.1.0');
+  console.log(version);
 }
 
 async function printRules(): Promise<void> {
   const projectRoot = getFlag('root') ?? process.cwd();
 
+  let config: GeoLintConfig;
   try {
-    const config = await loadConfig(projectRoot);
-    const linkExtractor = createLinkExtractor(config.siteUrl);
-    const rules = buildRules(config, linkExtractor);
-
-    const ruleList = rules.map(r => ({
-      name: r.name,
-      severity: r.severity,
-      category: r.category ?? 'uncategorized',
-      fixStrategy: r.fixStrategy ?? null,
-    }));
-
-    console.log(JSON.stringify(ruleList, null, 2));
+    config = await loadConfig(projectRoot);
   } catch {
-    console.error('geo-lint: Could not load config. Create a geo-lint.config.ts first.');
-    process.exit(1);
+    config = { siteUrl: 'https://example.com', ...DEFAULT_CONFIG } as GeoLintConfig;
   }
+
+  const linkExtractor = createLinkExtractor(config.siteUrl);
+  const rules = buildRules(config, linkExtractor);
+
+  const ruleList = rules.map(r => ({
+    name: r.name,
+    severity: r.severity,
+    category: r.category ?? 'uncategorized',
+    fixStrategy: r.fixStrategy ?? null,
+  }));
+
+  console.log(JSON.stringify(ruleList, null, 2));
 }
 
 async function main(): Promise<void> {
