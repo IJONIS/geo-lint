@@ -6,6 +6,8 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/ijonis/geo-lint/ci.yml?branch=main&label=CI)](https://github.com/IJONIS/geo-lint/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/IJONIS/geo-lint/blob/main/LICENSE)
 
+![geo-lint demo](docs/demo.gif)
+
 ---
 
 ## Why this exists
