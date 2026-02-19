@@ -143,7 +143,22 @@ See the [complete rule reference](docs/rules.md) with descriptions and severity 
 
 ## Agent-First Design
 
-This linter is a **rule engine for AI agents**, not a reporting tool for humans. The agent runs it, reads the structured output, fixes every violation, and re-lints until the content is clean.
+This linter is **deterministic** -- same content in, same violations out, every time. Your AI agent provides the creativity to fix the content; geo-lint provides the guardrails to verify it's correct. The loop runs until violations hit zero.
+
+### Try it now
+
+Paste this into **Claude Code**, **Cursor**, or any AI coding agent:
+
+```
+Run npx geo-lint --format=json, then fix every violation in the reported
+files using each violation's suggestion field. After fixing, re-run the
+linter and repeat until the output is an empty array []. Preserve the
+author's voice -- restructure, don't rewrite.
+```
+
+That's it. The agent will iterate automatically.
+
+### What the agent sees
 
 ```bash
 npx geo-lint --format=json
@@ -167,13 +182,9 @@ Every violation includes:
 - **`fixStrategy`** -- machine-readable fix pattern for the rule
 - **`file`, `field`, `line`** -- exact location so the agent edits the right place
 
-Discover all rules and their fix strategies:
+An empty array `[]` means zero violations -- the content is clean. The agent knows to stop.
 
-```bash
-npx geo-lint --rules
-```
-
-See the full [Agent Integration Guide](docs/agent-integration.md) for workflows, a Claude Code skill template, and handling edge cases.
+See the full [Agent Integration Guide](docs/agent-integration.md) for per-agent setup, a Claude Code skill, and handling edge cases.
 
 ---
 

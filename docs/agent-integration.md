@@ -1,6 +1,48 @@
 # Agent Integration
 
-This linter is built for AI agents. The agent runs it, reads structured violations, fixes the content, and re-runs until clean. Every rule includes machine-readable `suggestion` and `fixStrategy` fields -- no human interpretation needed.
+`geo-lint` is a **deterministic rule engine**. Same content in, same violations out, every time. Your AI agent provides the creativity to fix the content; the linter provides the guardrails to verify it's correct. The loop runs until violations hit zero -- no human in the middle.
+
+This is the key design principle: **the linter never guesses, the agent never validates**. Each does what it's best at.
+
+---
+
+## Quick Start -- Just Paste This Into Your Agent
+
+### Claude Code
+
+```
+Run npx geo-lint --format=json, then fix every violation in the reported
+files using each violation's suggestion field. After fixing, re-run the
+linter and repeat until the output is an empty array []. Preserve the
+author's voice -- restructure, don't rewrite.
+```
+
+For a persistent setup, save the [Claude Code skill template](#claude-code-skill-template) below to `.claude/skills/geo-lint.md` in your project. Then it's available in every session.
+
+### Cursor / Windsurf / Copilot
+
+Open the agent chat and paste:
+
+```
+Install @ijonis/geo-lint as a dev dependency. Run npx geo-lint --format=json
+to get a JSON array of content violations. For each violation, open the
+file listed in the "file" field, apply the fix described in "suggestion",
+and save. Then re-run npx geo-lint --format=json. Repeat until the output
+is an empty array. Fix errors first, then warnings. Don't fabricate
+statistics or data -- skip violations that require real sources and report
+them to me.
+```
+
+### Any agent that can run shell commands
+
+The pattern is always the same:
+
+1. Run `npx geo-lint --format=json`
+2. Parse the JSON array
+3. For each violation, apply the `suggestion` to the `file`
+4. Re-run, repeat until `[]`
+
+The JSON output has no ANSI formatting, no terminal colors -- pure structured data. Any agent that can execute shell commands and edit files can consume it.
 
 ---
 
