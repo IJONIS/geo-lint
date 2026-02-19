@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: npm install
+      - run: rm -rf node_modules package-lock.json && npm install
       - run: npm run typecheck
       - run: npm run test
       - run: npm run build
