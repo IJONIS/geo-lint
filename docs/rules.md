@@ -1,6 +1,8 @@
 # Rule Reference
 
-`@ijonis/geo-lint` ships with 92 rules across 5 categories. Every rule includes a `fixStrategy` and `suggestion` field that AI agents consume directly.
+`@ijonis/geo-lint` ships with 92 rules across 5 categories -- the most comprehensive open-source content linter available. SEO rules cover everything you'd expect from a production-grade linter (titles, descriptions, headings, canonical URLs, schema.org, keyword coherence, broken links). GEO rules go further, validating the structural patterns that determine whether AI search engines cite your content. Content quality rules provide readability analysis inspired by Yoast SEO, built for the agentic lint-fix loop.
+
+Every rule includes a `fixStrategy` and `suggestion` field that AI agents consume directly. Run the linter, let your agent fix the violations, re-lint until clean.
 
 | Category | Rules | Severity Mix | Focus |
 |----------|-------|-------------|-------|

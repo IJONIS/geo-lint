@@ -7,17 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-02-20
+
+### Fixed
+- `--version` flag was hardcoded to `0.1.0` -- now reads dynamically from package.json
+- `--rules` flag crashed without a config file -- now falls back to defaults so users can discover all 92 rules without project setup
+
+### Changed
+- Polished README: 1008 lines → 259 lines with stronger GEO and agentic workflow framing
+- Split reference documentation into 7 dedicated docs/ files (rules, GEO examples, configuration, custom adapters, API, agent integration)
+- Added copy-paste agent prompts for Claude Code, Cursor, Windsurf, and Copilot
+- Updated GitHub repo description, homepage, and topic tags
+
+## [0.1.1] - 2026-02-19
+
 ### Added
-- 28 new GEO rules across 4 categories (total: 35 GEO rules, 81 rules overall)
+- 28 new GEO rules across 4 categories (total: 35 GEO rules, 92 rules overall)
   - **E-E-A-T (8 rules):** source citations, expert quotes, author validation, heading quality, FAQ quality, definition patterns, how-to steps, TL;DR detection
   - **Structure (7 rules):** section length, paragraph length, list presence, citation block bounds, orphaned intros, heading density, structural element ratio
   - **Freshness (7 rules):** stale year references, outdated content, passive voice, sentence length, internal links, comparison tables, inline HTML
   - **RAG Optimization (6 rules):** extraction triggers, section self-containment, vague openings, acronym expansion, statistic context, summary sections
+- 14 content quality rules including readability analysis inspired by Yoast SEO: transition words, consecutive sentence starts, sentence length variety, vocabulary diversity, jargon density
 - `author` field support in ContentItem and MDX adapter
 - 6 new GeoConfig options: `fillerPhrases`, `extractionTriggers`, `acronymAllowlist`, `vagueHeadings`, `genericAuthorNames`, `allowedHtmlTags`
-- New utility module `geo-advanced-analyzer.ts` with 10 analysis functions
-- Extended `geo-analyzer.ts` with 6 new utility functions
-- Comprehensive tests for all 28 new rules (~120 tests)
+- Comprehensive tests for all new rules (~120 tests)
 
 ## [0.1.0] - 2026-02-18
 
@@ -30,4 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MDX/Markdown content adapter with `gray-matter`
 - CLI with `--format=json`, `--rules`, `--root`, `--config` flags
 
+[0.1.2]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.2
+[0.1.1]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.1
 [0.1.0]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.0

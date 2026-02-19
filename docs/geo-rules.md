@@ -1,8 +1,12 @@
 # GEO Rules -- Optimize Content for AI Search
 
-GEO (Generative Engine Optimization) is the practice of structuring content so it gets cited by AI search engines -- ChatGPT, Perplexity, Google AI Overviews, Gemini. Traditional SEO gets you into search result lists. GEO gets your content **cited in AI-generated answers**.
+When someone asks ChatGPT, Perplexity, or Google AI Overviews a question, the model pulls from web content to build its answer. **Which content gets cited is not random** -- it follows predictable structural patterns that can be checked mechanically.
 
-These 7 core rules target the content patterns that AI systems use when deciding what to extract and present to users. Each rule includes a before/after example showing the exact structural change your agent should make.
+**GEO (Generative Engine Optimization)** is the practice of structuring content to match these patterns. Traditional SEO gets you into search result lists. GEO gets your content **cited in AI-generated answers**. Both matter -- but no existing open-source tool checks for GEO. That's why these rules exist.
+
+We researched the current state of GEO and AEO (Answer Engine Optimization) to identify what actually drives AI citation. These 7 core rules target the highest-impact patterns: how LLMs select headings to match queries, how they extract lead paragraphs as citation snippets, why data-backed claims get cited over vague statements, and why structured formats like tables and FAQs are extracted verbatim.
+
+Each rule includes a before/after example showing the exact change. When you run geo-lint with an AI agent, the agent applies these fixes automatically and re-lints until every violation is resolved.
 
 ---
 

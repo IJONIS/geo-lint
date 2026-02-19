@@ -12,11 +12,13 @@
 
 ## Why this exists
 
-**GEO (Generative Engine Optimization)** is the practice of structuring content so AI search engines cite it -- ChatGPT, Perplexity, Google AI Overviews, Gemini. Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. They require different content patterns, and no existing open-source tool checks for GEO.
+I run multiple content-heavy sites and there was no deterministic way to validate whether my content was actually optimized -- not "probably fine," but actually checked against concrete rules. SEO linters exist, but they're either paid SaaS, not automatable, or completely ignore the structural patterns that AI search engines use when deciding what to cite.
 
-`@ijonis/geo-lint` is built for an agentic workflow: your AI agent runs the linter, reads the JSON violations, fixes the content, and re-lints until clean. Every rule ships with a machine-readable `suggestion` and `fixStrategy` that agents consume directly.
+So I built one. **GEO (Generative Engine Optimization)** is the practice of structuring content so it gets cited by ChatGPT, Perplexity, Google AI Overviews, and Gemini. Traditional SEO gets you into search result lists. GEO gets you **cited in AI-generated answers**. Both matter -- and no existing open-source tool checks for GEO.
 
-**92 rules: 35 GEO, 32 SEO, 14 content quality, 8 technical, 3 i18n.** Readability analysis inspired by Yoast SEO. Zero open-source alternatives for the GEO checks.
+The goal was simple: install one tool, point your AI agent at it, and walk away. The agent runs the linter, reads the JSON violations, fixes the content, re-lints until clean -- across an entire site, no manual input. One command, both SEO and GEO validated.
+
+**92 rules: 35 GEO, 32 SEO, 14 content quality, 8 technical, 3 i18n.** Readability analysis inspired by Yoast SEO. We researched the current state of GEO and AEO to make sure the rules reflect what actually gets content cited -- not outdated advice.
 
 ---
 
