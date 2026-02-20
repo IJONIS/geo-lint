@@ -265,6 +265,9 @@ Options:
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing, and how to add new rules. Changes are tracked in the [CHANGELOG](CHANGELOG.md).
 
+**Questions or ideas?** Open a [GitHub Discussion](https://github.com/IJONIS/geo-lint/discussions).
+**Bugs or feature requests?** Open a [GitHub Issue](https://github.com/IJONIS/geo-lint/issues).
+
 ## License
 
 [MIT](LICENSE)
