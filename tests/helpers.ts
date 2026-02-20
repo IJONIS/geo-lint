@@ -28,6 +28,7 @@ export function createContext(overrides: Partial<RuleContext> = {}): RuleContext
       content: { minWordCount: 300, minReadabilityScore: 30 },
     },
     geoEnabledContentTypes: ['blog'],
+    defaultLocale: 'de',
     ...overrides,
   };
 }

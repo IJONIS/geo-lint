@@ -60,11 +60,11 @@ export const jargonDensity: Rule = {
   severity: 'warning',
   category: 'content',
   fixStrategy: 'Replace complex or uncommon words with simpler alternatives',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     const wordCount = countWords(item.body);
     if (wordCount < QUALITY_MIN_WORDS) return [];
 
-    const locale = item.locale ?? 'en';
+    const locale = item.locale ?? context.defaultLocale ?? 'en';
     const analysis = analyzeJargonDensity(item.body, locale);
 
     if (analysis.density >= JARGON_ERROR_THRESHOLD) {
@@ -244,11 +244,11 @@ export const lowTransitionWords: Rule = {
   severity: 'warning',
   category: 'content',
   fixStrategy: 'Add transition words (however, therefore, for example, in addition) to connect ideas between sentences',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     const wordCount = countWords(item.body);
     if (wordCount < TRANSITION_MIN_WORDS) return [];
 
-    const locale = item.locale ?? 'en';
+    const locale = item.locale ?? context.defaultLocale ?? 'en';
     const analysis = analyzeTransitionWords(item.body, locale);
 
     if (analysis.totalSentences < 5) return [];
@@ -286,11 +286,11 @@ export const consecutiveStarts: Rule = {
   severity: 'warning',
   category: 'content',
   fixStrategy: 'Vary sentence openings — use transition words, prepositional phrases, or reversed structures',
-  run: (item: ContentItem): LintResult[] => {
+  run: (item: ContentItem, context: RuleContext): LintResult[] => {
     const wordCount = countWords(item.body);
     if (wordCount < CONSECUTIVE_STARTS_MIN_WORDS) return [];
 
-    const locale = item.locale ?? 'en';
+    const locale = item.locale ?? context.defaultLocale ?? 'en';
     const analysis = analyzeSentenceBeginnings(item.body, locale);
 
     if (analysis.groups.length === 0) return [];

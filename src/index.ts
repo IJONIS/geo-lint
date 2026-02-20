@@ -76,6 +76,7 @@ export async function lint(options: LintOptions = {}): Promise<number> {
     validImages: buildImageRegistry(config.imageDirectories),
     thresholds: config.thresholds,
     geoEnabledContentTypes: config.geo.enabledContentTypes ?? ['blog'],
+    defaultLocale: config.i18n.defaultLocale,
   };
 
   if (isPretty) {
@@ -141,6 +142,7 @@ export async function lintQuiet(options: LintOptions = {}): Promise<LintResult[]
     validImages: buildImageRegistry(config.imageDirectories),
     thresholds: config.thresholds,
     geoEnabledContentTypes: config.geo.enabledContentTypes ?? ['blog'],
+    defaultLocale: config.i18n.defaultLocale,
   };
 
   const rules = buildRules(config, linkExtractor);

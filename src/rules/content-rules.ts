@@ -58,7 +58,8 @@ export const lowReadability: Rule = {
     const c = context.thresholds
       ? resolveThresholds(context.thresholds, item.contentType).content
       : CONTENT_DEFAULTS;
-    const readability = calculateReadability(item.body);
+    const locale = item.locale ?? context.defaultLocale ?? 'de';
+    const readability = calculateReadability(item.body, locale);
 
     if (!isReadable(readability.score, c.minReadabilityScore)) {
       /** Escalate to error for extremely unreadable content (score < 20) */

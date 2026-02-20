@@ -55,12 +55,13 @@ export function isComplexWord(
   originalWord: string,
   config: LocaleComplexityConfig,
   frequencyList: ReadonlySet<string> | undefined,
+  locale: string = 'en',
 ): boolean {
   // Short words are never complex
   if (normalizedWord.length <= config.minLength) return false;
 
   // Words with fewer than minSyllables are not complex
-  if (estimateSyllables(normalizedWord) < config.minSyllables) return false;
+  if (estimateSyllables(normalizedWord, locale) < config.minSyllables) return false;
 
   // Common words (in frequency list) are not complex
   if (frequencyList?.has(normalizedWord)) return false;
@@ -107,7 +108,7 @@ export function analyzeWordComplexity(body: string, locale: string = 'en'): Comp
 
   for (const original of rawWords) {
     const normalized = original.toLowerCase();
-    if (isComplexWord(normalized, original, config, frequencyList)) {
+    if (isComplexWord(normalized, original, config, frequencyList, locale)) {
       complexCount++;
       complexCounts.set(normalized, (complexCounts.get(normalized) ?? 0) + 1);
     }

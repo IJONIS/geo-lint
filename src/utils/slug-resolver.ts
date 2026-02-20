@@ -12,7 +12,10 @@ import type { ContentPathConfig } from '../config/types.js';
  * Extract frontmatter slug and locale from a raw MDX file
  * Returns null if the file has no valid frontmatter
  */
-function extractSlugFromFile(filePath: string): { slug: string; locale: string } | null {
+function extractSlugFromFile(
+  filePath: string,
+  defaultLocale: string = 'de',
+): { slug: string; locale: string } | null {
   try {
     const content = readFileSync(filePath, 'utf-8');
     if (!content.startsWith('---')) return null;
@@ -32,7 +35,7 @@ function extractSlugFromFile(filePath: string): { slug: string; locale: string }
 
     return {
       slug: slugMatch[1].trim(),
-      locale: localeMatch ? localeMatch[1].trim() : 'de',
+      locale: localeMatch ? localeMatch[1].trim() : defaultLocale,
     };
   } catch {
     return null;
@@ -80,15 +83,16 @@ export function scanRawContentPermalinks(
 
     const urlPrefix = pathConfig.urlPrefix ?? '/';
 
+    const defaultLocale = pathConfig.defaultLocale ?? 'de';
+
     for (const file of findFilesInDir(contentDir, '.mdx')) {
-      const meta = extractSlugFromFile(file);
+      const meta = extractSlugFromFile(file, defaultLocale);
       if (!meta) continue;
 
       // Build permalink based on locale and URL prefix
       let permalink: string;
-      const defaultLocale = pathConfig.defaultLocale ?? 'de';
 
-      if (meta.locale !== defaultLocale && meta.locale !== 'de') {
+      if (meta.locale !== defaultLocale) {
         // Non-default locale: prefix with locale
         permalink = `/${meta.locale}${urlPrefix}${meta.slug}`.replace(/\/+/g, '/');
       } else {

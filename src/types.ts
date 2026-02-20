@@ -72,6 +72,8 @@ export interface RuleContext {
   thresholds?: import('./config/types.js').ThresholdConfig;
   /** Content types that GEO rules run on (defaults to ['blog'] when absent) */
   geoEnabledContentTypes?: ContentType[];
+  /** Configured default locale for fallback when item.locale is undefined */
+  defaultLocale?: string;
 }
 
 /**
