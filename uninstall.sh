@@ -24,6 +24,12 @@ main() {
     REMOVED=true
   fi
 
+  if [ -d "$SKILLS_DIR/content-creator" ]; then
+    rm -rf "$SKILLS_DIR/content-creator"
+    ok "Removed skill: $SKILLS_DIR/content-creator"
+    REMOVED=true
+  fi
+
   if [ -f "$AGENTS_DIR/geo-lint-fixer.md" ]; then
     rm -f "$AGENTS_DIR/geo-lint-fixer.md"
     ok "Removed agent: $AGENTS_DIR/geo-lint-fixer.md"
@@ -35,7 +41,10 @@ main() {
   fi
 
   echo ""
-  ok "geo-lint skill removed. Restart Claude Code to apply."
+  ok "geo-lint skills removed. Restart Claude Code to apply."
+  echo ""
+  echo "  Note: Project-level content configs (.claude/skills/content-config/)"
+  echo "  are not removed. Delete those manually if no longer needed."
   echo ""
 }
 

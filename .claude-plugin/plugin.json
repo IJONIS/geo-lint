@@ -1,7 +1,7 @@
 {
   "name": "geo-lint",
-  "version": "0.1.5",
-  "description": "SEO & GEO content linter with 92 deterministic rules for AI search visibility. Validates Markdown/MDX content for citation readiness, E-E-A-T signals, and structural patterns that AI search engines use when deciding what to cite.",
+  "version": "0.2.0",
+  "description": "SEO & GEO content toolkit: /geo-lint validates content with 92 deterministic rules, /content-creator builds a self-configuring content pipeline with auto-discovery, brand voice, keyword research, and lint-fix validation until zero violations.",
   "author": {
     "name": "IJONIS",
     "email": "hello@ijonis.com",
@@ -19,6 +19,9 @@
     "agent-skill",
     "ai-search",
     "content-linting",
+    "content-creation",
+    "brand-voice",
+    "seo-content",
     "markdown",
     "mdx"
   ]

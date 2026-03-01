@@ -165,8 +165,10 @@ curl -fsSL https://raw.githubusercontent.com/IJONIS/geo-lint/main/install.sh | b
 
 This installs:
 - **`/geo-lint` skill** -- orchestrator with 5 sub-commands (audit, fix, rules, init, report)
+- **`/content-creator` skill** -- self-configuring content creation pipeline (setup, create, voice, calendar, refresh)
 - **`geo-lint-fixer` agent** -- autonomous subagent for parallel file fixing
 - **Rule reference** -- all 92 rules with fix strategies, loaded on demand
+- **Content references** -- brand guidelines, content frameworks, social media optimization, brand voice analyzer
 
 To uninstall:
 
@@ -237,6 +239,73 @@ Some violations cannot be fixed autonomously. Flag these immediately rather than
 | `category-invalid` | Valid categories come from `geo-lint.config.ts`; do not invent new ones |
 
 When an agent encounters these, it should skip the violation, note the rule name and file, and surface the issue to the user for manual resolution.
+
+---
+
+## Content Creation Pipeline
+
+### Two-Skill Architecture
+
+geo-lint ships two complementary skills that form a closed-loop content pipeline:
+
+- **`/geo-lint`** (validation) -- deterministic rule engine. 92 rules, same input = same output, always.
+- **`/content-creator`** (creation) -- self-configuring content pipeline that uses `/geo-lint` as its quality gate.
+
+The creation skill produces content; the validation skill verifies it. The loop runs until violations hit zero. Neither skill works as well alone -- together they deliver a fully autonomous content workflow.
+
+### The Closed Loop
+
+The `/content-creator` skill closes the loop: **create** content with full project awareness, then **validate** with geo-lint, fix violations, and re-validate until clean.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  First use: /content-creator setup                      │
+│  Agent scans repo → discovers schema → asks questions   │
+│  → generates project-level content-config skill         │
+└───────────────────────┬─────────────────────────────────┘
+                        v
+┌─────────────────────────────────────────────────────────┐
+│  /content-creator create                                │
+│  Duplicate gate → keyword research → write content      │
+│  → npx geo-lint → fix violations → re-lint → done       │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Setup: Auto-Discovery + Questionnaire
+
+On first invocation, the skill:
+
+1. **Scans your project** -- detects framework (Next.js, Astro, Hugo, etc.), content directories, file extensions, frontmatter schema, categories, authors, locales, site URL, image directories, MDX components
+2. **Presents findings** -- shows a summary table of everything discovered for your confirmation
+3. **Asks 4-5 questions** -- brand voice archetype, tone attributes, target audience, content goals
+4. **Generates config** -- creates `.claude/skills/content-config/SKILL.md` in your project with all discovered + configured data, and scaffolds `geo-lint.config.ts` if missing
+
+### Create: Full Pipeline
+
+Every `/content-creator create` invocation runs:
+
+1. **Duplicate gate** -- scans existing content to prevent topic overlap
+2. **Keyword research** -- WebSearch with purchase-intent-first strategy, SERP viability filter
+3. **Template selection** -- how-to, listicle, case study, or thought leadership
+4. **Content writing** -- follows project schema, brand voice, available components
+5. **Validation** -- `npx geo-lint --format=json`, fix all violations, re-lint until clean (max 5 passes)
+6. **Cross-linking** -- adds internal links to related posts, updates existing posts with backlinks
+
+### Other Commands
+
+```
+/content-creator voice       # Analyze content voice, compare against config, adjust
+/content-creator calendar    # Plan monthly content calendar with topic research
+/content-creator refresh     # Re-scan project, update config with new discoveries
+```
+
+### Customizing the Generated Config
+
+After setup, edit `.claude/skills/content-config/SKILL.md` freely -- add project-specific components, custom frontmatter fields, bilingual naming rules, or anything unique to your workflow. The generated config is a starting point; you own it from there.
+
+Run `/content-creator refresh` anytime to re-scan and merge new discoveries (categories, authors, components) without overwriting your customizations.
 
 ---
 

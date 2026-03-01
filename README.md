@@ -31,6 +31,20 @@ Then in any Claude Code session:
 
 The skill runs an autonomous lint-fix loop: scan your content, read structured violations, fix them using each violation's `suggestion` field, and re-lint until clean. Parallel subagents handle multiple files simultaneously.
 
+### Content Creation Pipeline
+
+The install also adds `/content-creator` -- a self-configuring content pipeline that creates SEO & GEO-optimized content matched to your project:
+
+```
+/content-creator setup      # Auto-discover your project + configure brand voice
+/content-creator create      # Create content with keyword research + validation
+/content-creator voice       # Analyze and adjust brand voice
+/content-creator calendar    # Plan monthly content calendar
+/content-creator refresh     # Update config when your project evolves
+```
+
+On first use, the skill scans your project to learn its framework, content schema, categories, and authors. It then asks a few questions about your brand voice and audience. From that point on, every piece of content is created with full project awareness and validated against geo-lint's 92 rules until clean -- zero manual intervention for mechanical quality.
+
 Or paste this into **any** AI agent (Claude Code, Cursor, Windsurf, Copilot):
 
 ```

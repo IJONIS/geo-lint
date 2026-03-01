@@ -37,8 +37,12 @@ main() {
 
   # ── Clean previous installation ────────────────────────────────────
   if [ -d "$SKILLS_DIR/geo-lint" ]; then
-    warn "Previous skill installation found -- removing"
+    warn "Previous geo-lint skill found -- removing"
     rm -rf "$SKILLS_DIR/geo-lint"
+  fi
+  if [ -d "$SKILLS_DIR/content-creator" ]; then
+    warn "Previous content-creator skill found -- removing"
+    rm -rf "$SKILLS_DIR/content-creator"
   fi
   if [ -f "$AGENTS_DIR/geo-lint-fixer.md" ]; then
     rm -f "$AGENTS_DIR/geo-lint-fixer.md"
@@ -52,10 +56,18 @@ main() {
   git clone --depth=1 --quiet "$REPO_URL.git" "$TEMP_DIR/geo-lint" 2>/dev/null \
     || err "Failed to download geo-lint. Check your internet connection."
 
-  # ── Install skill ──────────────────────────────────────────────────
+  # ── Install skills ─────────────────────────────────────────────────
   mkdir -p "$SKILLS_DIR"
+
+  [ -d "$TEMP_DIR/geo-lint/skills/geo-lint" ] \
+    || err "geo-lint skill not found in download."
   cp -r "$TEMP_DIR/geo-lint/skills/geo-lint" "$SKILLS_DIR/"
   ok "Skill installed: /geo-lint"
+
+  [ -d "$TEMP_DIR/geo-lint/skills/content-creator" ] \
+    || err "content-creator skill not found in download."
+  cp -r "$TEMP_DIR/geo-lint/skills/content-creator" "$SKILLS_DIR/"
+  ok "Skill installed: /content-creator"
 
   # ── Install agent ──────────────────────────────────────────────────
   mkdir -p "$AGENTS_DIR"
@@ -64,15 +76,23 @@ main() {
 
   # ── Done ───────────────────────────────────────────────────────────
   echo ""
-  ok "geo-lint skill installed successfully!"
+  ok "geo-lint skills installed successfully!"
   echo ""
   echo "  Restart Claude Code, then use:"
   echo ""
-  echo "    /geo-lint audit        Full sweep -- find and fix all violations"
-  echo "    /geo-lint fix <slug>   Fix a single content file"
-  echo "    /geo-lint rules        Show all 92 rules"
-  echo "    /geo-lint init         Set up geo-lint.config.ts"
-  echo "    /geo-lint report       Generate health summary"
+  echo "  Validation:"
+  echo "    /geo-lint audit          Full sweep -- find and fix all violations"
+  echo "    /geo-lint fix <slug>     Fix a single content file"
+  echo "    /geo-lint rules          Show all 92 rules"
+  echo "    /geo-lint init           Set up geo-lint.config.ts"
+  echo "    /geo-lint report         Generate health summary"
+  echo ""
+  echo "  Content Creation:"
+  echo "    /content-creator setup   Auto-discover project + configure brand voice"
+  echo "    /content-creator create  Create content with research + validation"
+  echo "    /content-creator voice   Analyze and adjust brand voice"
+  echo "    /content-creator calendar  Plan monthly content calendar"
+  echo "    /content-creator refresh   Update config when your project evolves"
   echo ""
   echo "  Docs: https://github.com/IJONIS/geo-lint"
   echo ""
