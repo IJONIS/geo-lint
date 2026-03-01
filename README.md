@@ -5,8 +5,38 @@
 [![npm version](https://img.shields.io/npm/v/@ijonis/geo-lint)](https://www.npmjs.com/package/@ijonis/geo-lint)
 [![CI](https://img.shields.io/github/actions/workflow/status/ijonis/geo-lint/ci.yml?branch=main&label=CI)](https://github.com/IJONIS/geo-lint/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/IJONIS/geo-lint/blob/main/LICENSE)
+[![Claude Code Skill](https://img.shields.io/badge/Claude_Code-Skill-blueviolet)](https://github.com/IJONIS/geo-lint)
 
 ![geo-lint demo](docs/demo.gif)
+
+---
+
+## Use with Claude Code
+
+Install the geo-lint skill in one command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/IJONIS/geo-lint/main/install.sh | bash
+```
+
+Then in any Claude Code session:
+
+```
+/geo-lint audit        # Full sweep — find and fix all violations
+/geo-lint fix <slug>   # Fix a single content file
+/geo-lint rules        # Show all 92 rules with fix strategies
+/geo-lint init         # Set up geo-lint.config.ts for a new project
+/geo-lint report       # Generate a GEO/SEO health summary
+```
+
+The skill runs an autonomous lint-fix loop: scan your content, read structured violations, fix them using each violation's `suggestion` field, and re-lint until clean. Parallel subagents handle multiple files simultaneously.
+
+Or paste this into **any** AI agent (Claude Code, Cursor, Windsurf, Copilot):
+
+```
+Run npx geo-lint --format=json, then fix every violation using each
+violation's suggestion field. Re-run until the output is [].
+```
 
 ---
 
@@ -147,9 +177,13 @@ See the [complete rule reference](docs/rules.md) with descriptions and severity 
 
 This linter is **deterministic** -- same content in, same violations out, every time. Your AI agent provides the creativity to fix the content; geo-lint provides the guardrails to verify it's correct. The loop runs until violations hit zero.
 
-### Try it now
+### Claude Code Plugin
 
-Paste this into **Claude Code**, **Cursor**, or any AI coding agent:
+Install the skill and use `/geo-lint audit` to validate and fix your entire content directory automatically. The skill runs the full lint-fix loop with parallel subagents -- one per file. See [Use with Claude Code](#use-with-claude-code) above.
+
+### Any AI Agent
+
+Paste this into **Cursor**, **Windsurf**, **Copilot**, or any AI coding agent:
 
 ```
 Run npx geo-lint --format=json, then fix every violation in the reported

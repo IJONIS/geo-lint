@@ -8,7 +8,27 @@ This is the key design principle: **the linter never guesses, the agent never va
 
 ## Quick Start -- Just Paste This Into Your Agent
 
-### Claude Code
+### Claude Code (Recommended)
+
+Install the geo-lint skill as a Claude Code plugin:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/IJONIS/geo-lint/main/install.sh | bash
+```
+
+Then use `/geo-lint audit` to validate and fix your entire content directory automatically. The skill runs the full lint-fix loop with parallel subagents -- one per file.
+
+Available commands:
+
+```
+/geo-lint audit        # Full sweep with parallel fixing
+/geo-lint fix <slug>   # Fix a single content file
+/geo-lint rules        # Show all 92 rules with fix strategies
+/geo-lint init         # Set up geo-lint.config.ts
+/geo-lint report       # Generate a GEO/SEO health summary
+```
+
+**Manual alternative:** If you prefer not to install the plugin, paste this into any Claude Code session:
 
 ```
 Run npx geo-lint --format=json, then fix every violation in the reported
@@ -16,8 +36,6 @@ files using each violation's suggestion field. After fixing, re-run the
 linter and repeat until the output is an empty array []. Preserve the
 author's voice -- restructure, don't rewrite.
 ```
-
-For a persistent setup, save the [Claude Code skill template](#claude-code-skill-template) below to `.claude/skills/geo-lint.md` in your project. Then it's available in every session.
 
 ### Cursor / Windsurf / Copilot
 
@@ -137,9 +155,28 @@ This returns the full rule catalog. The agent can use `fixStrategy` to understan
 
 ---
 
-## Claude Code Skill Template
+## Claude Code Plugin
 
-Add this to your project's `.claude/skills/` and the agent will optimize your content autonomously:
+The recommended way to use geo-lint with Claude Code is the installable plugin:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/IJONIS/geo-lint/main/install.sh | bash
+```
+
+This installs:
+- **`/geo-lint` skill** -- orchestrator with 5 sub-commands (audit, fix, rules, init, report)
+- **`geo-lint-fixer` agent** -- autonomous subagent for parallel file fixing
+- **Rule reference** -- all 92 rules with fix strategies, loaded on demand
+
+To uninstall:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/IJONIS/geo-lint/main/uninstall.sh | bash
+```
+
+### Manual Setup (Alternative)
+
+If you prefer not to install the plugin, add this to `.claude/skills/geo-lint.md` in your project:
 
 ```markdown
 ## GEO Lint & Fix
@@ -152,7 +189,7 @@ Add this to your project's `.claude/skills/` and the agent will optimize your co
    - For each violation, apply the fix described in `suggestion`
    - Preserve the author's voice -- don't rewrite, restructure
 5. Re-run `npx geo-lint --format=json`
-6. If violations remain, repeat from step 4 (max 3 passes)
+6. If violations remain, repeat from step 4 (max 5 passes)
 7. Report: files changed, violations fixed, any remaining issues
 ```
 

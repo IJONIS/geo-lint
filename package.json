@@ -22,7 +22,10 @@
     "content",
     "ai-search",
     "llm",
-    "build-tool"
+    "build-tool",
+    "claude-code",
+    "claude-code-skill",
+    "agent-skill"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
