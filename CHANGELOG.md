@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-03-03
+
+### Added
+- Claude Code skill plugin for ecosystem distribution — geo-lint is now installable as a Claude Code skill via `/install-skill`
+- `/content-creator` skill for self-configuring content pipelines — auto-detects project framework, generates adapter scripts, and runs iterative lint-fix loops
+
 ## [0.1.5] - 2026-02-20
 
 ### Fixed
@@ -65,6 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MDX/Markdown content adapter with `gray-matter`
 - CLI with `--format=json`, `--rules`, `--root`, `--config` flags
 
+[0.1.6]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.6
 [0.1.5]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.5
 [0.1.4]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.4
 [0.1.3]: https://github.com/IJONIS/geo-lint/releases/tag/v0.1.3
