@@ -20,7 +20,7 @@ import { robotsRules } from './robots-rules.js';
 import { slugRules } from './slug-rules.js';
 import { createI18nRules } from './i18n-rules.js';
 import { dateRules } from './date-rules.js';
-import { schemaRules } from './schema-rules.js';
+import { createSchemaRules } from './schema-rules.js';
 import { keywordCoherenceRules } from './keyword-coherence-rules.js';
 
 // Factory rule imports
@@ -39,6 +39,9 @@ import { createGeoRagRules } from './geo-rag-rules.js';
 
 // Content quality rules
 import { contentQualityRules } from './content-quality-rules.js';
+
+// Technical site-level rules
+import { createTechnicalSiteRules } from './technical-site-rules.js';
 
 /**
  * Build the complete rule set from config and link extractor
@@ -61,7 +64,7 @@ export function buildRules(config: GeoLintConfig, linkExtractor: LinkExtractor):
     ...createI18nRules(config.i18n),
     ...dateRules,
     ...(config.categories.length > 0 ? createCategoryRules(config.categories) : []),
-    ...schemaRules,
+    ...createSchemaRules(config.geo),
     ...createGeoRules(config.geo),
     ...createGeoEeatRules(config.geo),
     ...geoStructureRules,
@@ -70,6 +73,7 @@ export function buildRules(config: GeoLintConfig, linkExtractor: LinkExtractor):
     ...keywordCoherenceRules,
     ...createCanonicalRules(config.siteUrl),
     ...contentQualityRules,
+    ...createTechnicalSiteRules(config.technical),
   ];
 
   // Apply user rule overrides (severity changes + disabling)
@@ -151,7 +155,7 @@ export { robotsRules } from './robots-rules.js';
 export { slugRules } from './slug-rules.js';
 export { i18nRules, createI18nRules } from './i18n-rules.js';
 export { dateRules } from './date-rules.js';
-export { schemaRules } from './schema-rules.js';
+export { schemaStaticRules, schemaRules, createSchemaRules, createSchemaSameAsRule } from './schema-rules.js';
 export { keywordCoherenceRules } from './keyword-coherence-rules.js';
 export { geoStaticRules, geoRules } from './geo-rules.js';
 
@@ -171,3 +175,6 @@ export { geoRagStaticRules, createGeoRagRules } from './geo-rag-rules.js';
 
 // Content quality rule re-exports
 export { contentQualityRules } from './content-quality-rules.js';
+
+// Technical site-level rule re-exports
+export { createNoFeedRule, createNoLlmsTxtRule, createTechnicalSiteRules } from './technical-site-rules.js';

@@ -4,6 +4,7 @@
  */
 
 import type { Rule, ContentItem, LintResult } from '../types.js';
+import type { GeoConfig } from '../config/types.js';
 import { getDisplayPath } from '../utils/display-path.js';
 import { hasFAQSection, hasMarkdownTable } from '../utils/geo-analyzer.js';
 import { analyzeFaqQuality } from '../utils/geo-advanced-analyzer.js';
@@ -164,12 +165,102 @@ export const datasetSchemaReadiness: Rule = {
   },
 };
 
+const MIN_SAMEAS_ENTRIES = 2;
+
 /**
- * All schema rules
+ * Rule: Organization schema sameAs array should have 2+ entries
+ * Config-level check — runs once per lint (fires on first item only)
  */
-export const schemaRules: Rule[] = [
+export function createSchemaSameAsRule(
+  organizationSameAs: string[] | undefined
+): Rule {
+  let hasFired = false;
+
+  return {
+    name: 'seo-schema-sameas-incomplete',
+    severity: 'warning',
+    category: 'seo',
+    fixStrategy:
+      'Add social profiles (LinkedIn, GitHub, Twitter), Wikidata QID, and Crunchbase URL to Organization schema sameAs array',
+    run: (_item: ContentItem): LintResult[] => {
+      if (hasFired) return [];
+      hasFired = true;
+
+      // Not configured = skip (user hasn't declared sameAs)
+      if (!organizationSameAs || organizationSameAs.length === 0) return [];
+
+      if (organizationSameAs.length < MIN_SAMEAS_ENTRIES) {
+        return [
+          {
+            file: '_site',
+            field: 'schema',
+            rule: 'seo-schema-sameas-incomplete',
+            severity: 'warning',
+            message: `Organization sameAs has ${organizationSameAs.length} entry — include at least ${MIN_SAMEAS_ENTRIES} for entity verification`,
+            suggestion:
+              'AI models use sameAs to verify entity identity. Include at least LinkedIn + one other profile (GitHub, Wikidata QID, Crunchbase).',
+          },
+        ];
+      }
+
+      return [];
+    },
+  };
+}
+
+/**
+ * Rule: Service pages should have Service structured data
+ * Checks if page URL matches a service page pattern and flags it for schema markup
+ */
+export function createServicePageSchemaRule(
+  servicePagePatterns: string[] | undefined
+): Rule {
+  return {
+    name: 'seo-service-page-no-schema',
+    severity: 'warning',
+    category: 'seo',
+    fixStrategy:
+      'Add Service structured data (JSON-LD) to service pages with name, description, provider, and areaServed.',
+    run: (item: ContentItem): LintResult[] => {
+      if (!servicePagePatterns || servicePagePatterns.length === 0) return [];
+
+      const matchesPattern = servicePagePatterns.some((pattern) =>
+        item.permalink.includes(pattern)
+      );
+
+      if (!matchesPattern) return [];
+
+      return [
+        {
+          file: getDisplayPath(item),
+          field: 'schema',
+          rule: 'seo-service-page-no-schema',
+          severity: 'warning',
+          message: `Service page "${item.permalink}" should have Service structured data`,
+          suggestion:
+            'Service pages need schema markup to appear in AI answers for "[service] provider in [city]" queries. Add Service JSON-LD with name, description, provider, and areaServed.',
+        },
+      ];
+    },
+  };
+}
+
+/** Static schema rules (no config dependency) */
+export const schemaStaticRules: Rule[] = [
   blogMissingSchemaFields,
   faqpageSchemaReadiness,
   breadcrumblistSchemaReadiness,
   datasetSchemaReadiness,
 ];
+
+/** Build the complete schema rule set from config */
+export function createSchemaRules(geo: GeoConfig): Rule[] {
+  return [
+    ...schemaStaticRules,
+    createSchemaSameAsRule(geo.organizationSameAs),
+    createServicePageSchemaRule(geo.servicePagePatterns),
+  ];
+}
+
+// Keep backward-compatible export
+export const schemaRules = schemaStaticRules;

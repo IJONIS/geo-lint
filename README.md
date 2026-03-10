@@ -24,7 +24,7 @@ Then in any Claude Code session:
 ```
 /geo-lint audit        # Full sweep — find and fix all violations
 /geo-lint fix <slug>   # Fix a single content file
-/geo-lint rules        # Show all 92 rules with fix strategies
+/geo-lint rules        # Show all 97 rules with fix strategies
 /geo-lint init         # Set up geo-lint.config.ts for a new project
 /geo-lint report       # Generate a GEO/SEO health summary
 ```
@@ -43,7 +43,7 @@ The install also adds `/content-creator` -- a self-configuring content pipeline 
 /content-creator refresh     # Update config when your project evolves
 ```
 
-On first use, the skill scans your project to learn its framework, content schema, categories, and authors. It then asks a few questions about your brand voice and audience. From that point on, every piece of content is created with full project awareness and validated against geo-lint's 92 rules until clean -- zero manual intervention for mechanical quality.
+On first use, the skill scans your project to learn its framework, content schema, categories, and authors. It then asks a few questions about your brand voice and audience. From that point on, every piece of content is created with full project awareness and validated against geo-lint's 97 rules until clean -- zero manual intervention for mechanical quality.
 
 Or paste this into **any** AI agent (Claude Code, Cursor, Windsurf, Copilot):
 
@@ -62,7 +62,7 @@ So I built one. **GEO (Generative Engine Optimization)** is the practice of stru
 
 The goal was simple: install one tool, point your AI agent at it, and walk away. The agent runs the linter, reads the JSON violations, fixes the content, re-lints until clean -- across an entire site, no manual input. One command, both SEO and GEO validated.
 
-**92 rules: 35 GEO, 32 SEO, 14 content quality, 8 technical, 3 i18n.** Readability analysis inspired by Yoast SEO. We researched the current state of GEO and AEO to make sure the rules reflect what actually gets content cited -- not outdated advice.
+**97 rules: 36 GEO, 34 SEO, 14 content quality, 10 technical, 3 i18n.** Readability analysis inspired by Yoast SEO. We researched the current state of GEO and AEO to make sure the rules reflect what actually gets content cited -- not outdated advice.
 
 ---
 
@@ -161,15 +161,15 @@ components at build time.
 
 ---
 
-## All 92 Rules
+## All 97 Rules
 
 | Category | Rules | Severity Mix | Focus |
 |----------|-------|-------------|-------|
-| SEO | 32 | 6 errors, 26 warnings | Titles, descriptions, headings, slugs, OG images, canonical URLs, keywords, links, schema |
+| SEO | 34 | 6 errors, 28 warnings | Titles, descriptions, headings, slugs, OG images, canonical URLs, keywords, links, schema, sameAs, service pages |
 | Content | 14 | 2 errors, 12 warnings | Word count, readability, dates, categories, jargon density, repetition, vocabulary diversity, transition words, sentence variety |
-| Technical | 8 | 3 errors, 5 warnings | Broken links, image files, trailing slashes, external URLs, performance |
+| Technical | 10 | 3 errors, 7 warnings | Broken links, image files, trailing slashes, external URLs, performance, feeds, llms.txt |
 | i18n | 3 | 0 errors, 3 warnings | Translation pairs, locale metadata |
-| GEO | 35 | 0 errors, 35 warnings | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization |
+| GEO | 36 | 0 errors, 36 warnings | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization, author entity type |
 
 See the [complete rule reference](docs/rules.md) with descriptions and severity for every rule.
 

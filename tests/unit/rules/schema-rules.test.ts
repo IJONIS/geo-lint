@@ -4,6 +4,8 @@ import {
   faqpageSchemaReadiness,
   breadcrumblistSchemaReadiness,
   datasetSchemaReadiness,
+  createSchemaSameAsRule,
+  createServicePageSchemaRule,
 } from '../../../src/rules/schema-rules.js';
 import { createItem, createContext } from '../../helpers.js';
 
@@ -172,5 +174,108 @@ describe('dataset-schema-readiness', () => {
       date: '2024-01-01',
     });
     expect(datasetSchemaReadiness.run(item, ctx)).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// seo-schema-sameas-incomplete
+// ---------------------------------------------------------------------------
+
+describe('seo-schema-sameas-incomplete', () => {
+  it('skips when organizationSameAs is undefined', () => {
+    const rule = createSchemaSameAsRule(undefined);
+    const item = createItem();
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('skips when organizationSameAs is empty array', () => {
+    const rule = createSchemaSameAsRule([]);
+    const item = createItem();
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('warns when organizationSameAs has only 1 entry', () => {
+    const rule = createSchemaSameAsRule(['https://linkedin.com/company/acme']);
+    const item = createItem();
+    const results = rule.run(item, ctx);
+    expect(results).toHaveLength(1);
+    expect(results[0].rule).toBe('seo-schema-sameas-incomplete');
+    expect(results[0].severity).toBe('warning');
+  });
+
+  it('passes when organizationSameAs has 2+ entries', () => {
+    const rule = createSchemaSameAsRule([
+      'https://linkedin.com/company/acme',
+      'https://github.com/acme',
+    ]);
+    const item = createItem();
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('fires only once across multiple items', () => {
+    const rule = createSchemaSameAsRule(['https://linkedin.com/company/acme']);
+    const item1 = createItem({ slug: 'post-1' });
+    const item2 = createItem({ slug: 'post-2' });
+    const r1 = rule.run(item1, ctx);
+    const r2 = rule.run(item2, ctx);
+    expect(r1).toHaveLength(1);
+    expect(r2).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// seo-service-page-no-schema
+// ---------------------------------------------------------------------------
+
+describe('seo-service-page-no-schema', () => {
+  it('skips when no service page patterns configured', () => {
+    const rule = createServicePageSchemaRule(undefined);
+    const item = createItem({ permalink: '/services/web-design' });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('skips when service page patterns is empty', () => {
+    const rule = createServicePageSchemaRule([]);
+    const item = createItem({ permalink: '/services/web-design' });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('warns when permalink matches a service pattern', () => {
+    const rule = createServicePageSchemaRule(['/services/', '/leistungen/']);
+    const item = createItem({
+      permalink: '/services/web-design',
+      contentType: 'page',
+    });
+    const results = rule.run(item, ctx);
+    expect(results).toHaveLength(1);
+    expect(results[0].rule).toBe('seo-service-page-no-schema');
+    expect(results[0].severity).toBe('warning');
+  });
+
+  it('warns when permalink matches German service pattern', () => {
+    const rule = createServicePageSchemaRule(['/services/', '/leistungen/']);
+    const item = createItem({
+      permalink: '/leistungen/webentwicklung',
+      contentType: 'page',
+    });
+    expect(rule.run(item, ctx)).toHaveLength(1);
+  });
+
+  it('does not warn for non-matching pages', () => {
+    const rule = createServicePageSchemaRule(['/services/']);
+    const item = createItem({
+      permalink: '/about',
+      contentType: 'page',
+    });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('does not warn for blog posts even if URL matches', () => {
+    const rule = createServicePageSchemaRule(['/services/']);
+    const item = createItem({
+      permalink: '/blog/my-post',
+      contentType: 'blog',
+    });
+    expect(rule.run(item, ctx)).toHaveLength(0);
   });
 });

@@ -6,3 +6,4 @@ coverage/
 .env
 .env.*
 .serena/
+MARKETING_PLAN.md

@@ -88,10 +88,16 @@ export function mergeWithDefaults(user: GeoLintUserConfig): GeoLintConfig {
       vagueHeadings: user.geo?.vagueHeadings ?? DEFAULT_CONFIG.geo.vagueHeadings,
       genericAuthorNames: user.geo?.genericAuthorNames ?? DEFAULT_CONFIG.geo.genericAuthorNames,
       allowedHtmlTags: user.geo?.allowedHtmlTags ?? DEFAULT_CONFIG.geo.allowedHtmlTags,
+      organizationSameAs: user.geo?.organizationSameAs ?? DEFAULT_CONFIG.geo.organizationSameAs,
+      servicePagePatterns: user.geo?.servicePagePatterns ?? DEFAULT_CONFIG.geo.servicePagePatterns,
     },
     i18n: {
       locales: user.i18n?.locales ?? DEFAULT_CONFIG.i18n.locales,
       defaultLocale: user.i18n?.defaultLocale ?? DEFAULT_CONFIG.i18n.defaultLocale,
+    },
+    technical: {
+      feedUrls: user.technical?.feedUrls ?? DEFAULT_CONFIG.technical.feedUrls,
+      llmsTxtUrl: user.technical?.llmsTxtUrl ?? DEFAULT_CONFIG.technical.llmsTxtUrl,
     },
     rules: { ...DEFAULT_CONFIG.rules, ...(user.rules ?? {}) },
     thresholds: {

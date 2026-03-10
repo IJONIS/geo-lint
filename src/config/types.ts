@@ -38,6 +38,10 @@ export interface GeoConfig {
   genericAuthorNames?: string[];
   /** MDX component tags allowed in markdown (not flagged by inline-html rule) */
   allowedHtmlTags?: string[];
+  /** Organization sameAs URLs for entity verification (LinkedIn, GitHub, Wikidata QID, etc.) */
+  organizationSameAs?: string[];
+  /** URL patterns identifying service pages (e.g. ['/services/', '/leistungen/']) */
+  servicePagePatterns?: string[];
 }
 
 /** Internationalization configuration */
@@ -46,6 +50,14 @@ export interface I18nConfig {
   locales: string[];
   /** Default locale — maps to hreflang x-default. Must be in locales array */
   defaultLocale: string;
+}
+
+/** Technical site-level configuration */
+export interface TechnicalConfig {
+  /** Declared feed URLs (e.g. ['/feed.xml', '/rss.xml']) */
+  feedUrls?: string[];
+  /** Path to llms.txt file (e.g. '/llms.txt') */
+  llmsTxtUrl?: string;
 }
 
 /** User-facing configuration (partial, with defaults applied) */
@@ -68,6 +80,8 @@ export interface GeoLintUserConfig {
   geo?: Partial<GeoConfig>;
   /** Internationalization configuration */
   i18n?: Partial<I18nConfig>;
+  /** Technical site-level configuration */
+  technical?: Partial<TechnicalConfig>;
   /** Rule severity overrides: 'off' disables a rule */
   rules?: Record<string, 'error' | 'warning' | 'off'>;
   /** Threshold overrides */
@@ -95,6 +109,8 @@ export interface GeoLintConfig {
   excludeCategories: string[];
   geo: GeoConfig;
   i18n: I18nConfig;
+  /** Technical site-level configuration */
+  technical: TechnicalConfig;
   rules: Record<string, 'error' | 'warning' | 'off'>;
   thresholds: ThresholdConfig;
 }

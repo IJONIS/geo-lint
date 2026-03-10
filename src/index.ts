@@ -156,6 +156,7 @@ export type {
   GeoConfig,
   ContentPathConfig,
   ThresholdConfig,
+  TechnicalConfig,
   I18nConfig,
 } from './config/types.js';
 export type {

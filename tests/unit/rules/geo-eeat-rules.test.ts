@@ -10,6 +10,7 @@ import {
   geoMissingExpertQuotes,
   createGeoMissingAuthorRule,
   createGeoHeadingTooVagueRule,
+  createGeoAuthorNotPersonRule,
   geoFaqQuality,
   geoDefinitionPattern,
   geoHowtoSteps,
@@ -468,5 +469,74 @@ describe('geoMissingTldr', () => {
     const item = createItem({ body, contentType: 'blog' });
     const results = geoMissingTldr.run(item, ctx);
     expect(results).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// geo-author-not-person
+// ---------------------------------------------------------------------------
+
+describe('geo-author-not-person', () => {
+  it('skips non-blog content', () => {
+    const rule = createGeoAuthorNotPersonRule('ACME Corp');
+    const item = createItem({ contentType: 'page', author: 'ACME Corp' });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('skips when brandName is empty', () => {
+    const rule = createGeoAuthorNotPersonRule('');
+    const item = createItem({ author: 'ACME Corp' });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('skips when author is missing', () => {
+    const rule = createGeoAuthorNotPersonRule('ACME Corp');
+    const item = createItem({ author: undefined });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('warns when author exactly matches brandName', () => {
+    const rule = createGeoAuthorNotPersonRule('ACME Corp');
+    const item = createItem({ author: 'ACME Corp' });
+    const results = rule.run(item, ctx);
+    expect(results).toHaveLength(1);
+    expect(results[0].rule).toBe('geo-author-not-person');
+    expect(results[0].severity).toBe('warning');
+  });
+
+  it('warns when author matches brandName case-insensitively', () => {
+    const rule = createGeoAuthorNotPersonRule('ACME Corp');
+    const item = createItem({ author: 'acme corp' });
+    expect(rule.run(item, ctx)).toHaveLength(1);
+  });
+
+  it('warns when author contains org pattern (Team)', () => {
+    const rule = createGeoAuthorNotPersonRule('ACME Corp');
+    const item = createItem({ author: 'ACME Team' });
+    expect(rule.run(item, ctx)).toHaveLength(1);
+  });
+
+  it('warns when author contains org pattern (Redaktion)', () => {
+    const rule = createGeoAuthorNotPersonRule('MyBrand');
+    const item = createItem({ author: 'Redaktion' });
+    expect(rule.run(item, ctx)).toHaveLength(1);
+  });
+
+  it('warns when author contains org pattern (Editorial)', () => {
+    const rule = createGeoAuthorNotPersonRule('MyBrand');
+    const item = createItem({ author: 'Editorial Team' });
+    expect(rule.run(item, ctx)).toHaveLength(1);
+  });
+
+  it('passes when author is a person name', () => {
+    const rule = createGeoAuthorNotPersonRule('ACME Corp');
+    const item = createItem({ author: 'Jane Smith' });
+    expect(rule.run(item, ctx)).toHaveLength(0);
+  });
+
+  it('passes when author partially contains brand but is a person', () => {
+    const rule = createGeoAuthorNotPersonRule('Smith');
+    const item = createItem({ author: 'Jane Smith' });
+    expect(rule.run(item, ctx)).toHaveLength(0);
   });
 });

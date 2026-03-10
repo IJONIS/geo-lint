@@ -1,6 +1,6 @@
 {
   "name": "@ijonis/geo-lint",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "SEO and GEO (Generative Engine Optimization) linter for Markdown/MDX content — the first open-source linter that checks your content for AI search visibility",
   "license": "MIT",
   "author": "IJONIS <hello@ijonis.com> (https://ijonis.com)",

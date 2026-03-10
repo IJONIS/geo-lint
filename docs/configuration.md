@@ -44,6 +44,17 @@ export default defineConfig({
     vagueHeadings: ['introduction', 'overview'],        // Generic headings
     genericAuthorNames: ['admin', 'team'],              // Flagged author names
     allowedHtmlTags: ['Callout', 'Note'],               // MDX components
+    organizationSameAs: [                                // sameAs URLs for entity verification
+      'https://linkedin.com/company/acme',
+      'https://github.com/acme',
+    ],
+    servicePagePatterns: ['/services/', '/leistungen/'], // URL patterns for service pages
+  },
+
+  // Technical site-level configuration
+  technical: {
+    feedUrls: ['/feed.xml'],          // Declared feed URLs
+    llmsTxtUrl: '/llms.txt',          // Path to llms.txt
   },
 
   // Per-rule severity overrides ('error' | 'warning' | 'off')
@@ -77,6 +88,7 @@ export default defineConfig({
 | `excludeSlugs` | `string[]` | No | `[]` | Slugs to skip during linting |
 | `excludeCategories` | `string[]` | No | `['legal']` | Categories to skip entirely |
 | `geo` | `GeoConfig` | No | `{}` | GEO entity density configuration |
+| `technical` | `TechnicalConfig` | No | `{}` | Technical site-level checks (feeds, llms.txt) |
 | `rules` | `Record<string, Severity>` | No | `{}` | Per-rule severity overrides |
 | `thresholds` | `ThresholdConfig` | No | See above | Length and quality thresholds |
 
@@ -109,6 +121,19 @@ The `geo` object controls GEO rule behavior. All fields are optional -- when a v
 | `vagueHeadings` | Generic heading text checked by `geo-heading-too-vague`. Headings matching these terms are flagged as too generic for AI extraction. |
 | `genericAuthorNames` | Author names flagged by `geo-missing-author`. Names like "admin" or "team" do not satisfy E-E-A-T requirements. |
 | `allowedHtmlTags` | HTML/JSX tags exempted from `geo-inline-html`. Use this for MDX components like `<Callout>` or `<Note>` that are not raw HTML. |
+| `organizationSameAs` | URLs for `seo-schema-sameas-incomplete`. Declare your Organization sameAs entries (LinkedIn, GitHub, Wikidata QID). Rule flags if fewer than 2. |
+| `servicePagePatterns` | URL patterns for `seo-service-page-no-schema`. Pages matching these patterns are flagged if they lack Service structured data. |
+
+---
+
+## Technical Configuration
+
+The `technical` object controls site-level technical checks. All fields are optional.
+
+| Field | Purpose |
+|-------|---------|
+| `feedUrls` | URLs for `technical-no-feed`. Declare your RSS/Atom/JSON feed paths. Empty array = no feeds detected (warns). Omit entirely to skip the check. |
+| `llmsTxtUrl` | Path for `technical-no-llms-txt`. Declare your llms.txt endpoint. Empty string = no llms.txt (warns). Omit entirely to skip the check. |
 
 ---
 

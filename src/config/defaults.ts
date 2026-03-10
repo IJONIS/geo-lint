@@ -60,6 +60,12 @@ export const DEFAULT_CONFIG: Omit<GeoLintConfig, 'siteUrl'> = {
       'CodeBlock', 'Image', 'Video', 'Embed', 'Tabs', 'Tab',
     ],
     enabledContentTypes: ['blog'],
+    organizationSameAs: [],
+    servicePagePatterns: [],
+  },
+  technical: {
+    feedUrls: [],
+    llmsTxtUrl: '',
   },
   i18n: {
     locales: ['de', 'en'],

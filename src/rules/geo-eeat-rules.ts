@@ -388,6 +388,76 @@ export const geoMissingTldr: Rule = {
   },
 };
 
+/** Patterns indicating organization-as-author (case-insensitive match) */
+const ORG_AUTHOR_PATTERNS = [
+  /\bteam\b/i,
+  /\bredaktion\b/i,
+  /\beditorial\b/i,
+  /\beditors?\b/i,
+  /\bherausgeber\b/i,
+  /\bverlag\b/i,
+  /\bredaktionsteam\b/i,
+];
+
+// -- Rule: geo-author-not-person (factory) --
+export function createGeoAuthorNotPersonRule(brandName: string): Rule {
+  return {
+    name: 'geo-author-not-person',
+    severity: 'warning',
+    category: 'geo',
+    fixStrategy:
+      'Replace organization name with individual author name. Use Person type in BlogPosting schema for stronger E-E-A-T signals.',
+    run: (item: ContentItem, context: RuleContext): LintResult[] => {
+      const geoTypes = context.geoEnabledContentTypes ?? ['blog'];
+      if (!geoTypes.includes(item.contentType)) return [];
+
+      // Skip if no author (handled by geo-missing-author)
+      if (!item.author || item.author.trim() === '') return [];
+
+      // Skip if brand not configured
+      if (!brandName || brandName.trim() === '') return [];
+
+      const normalizedAuthor = item.author.trim().toLowerCase();
+
+      // Check 1: author exactly matches brand name
+      if (normalizedAuthor === brandName.trim().toLowerCase()) {
+        return [
+          {
+            file: getDisplayPath(item),
+            field: 'author',
+            rule: 'geo-author-not-person',
+            severity: 'warning',
+            message: `Author "${item.author}" is the organization name — use a person's name instead`,
+            suggestion:
+              'AI models cite named experts over faceless organizations. Use the actual author\'s name for stronger E-E-A-T signals.',
+          },
+        ];
+      }
+
+      // Check 2: author matches org patterns
+      const matchesOrgPattern = ORG_AUTHOR_PATTERNS.some((pattern) =>
+        pattern.test(item.author!)
+      );
+
+      if (matchesOrgPattern) {
+        return [
+          {
+            file: getDisplayPath(item),
+            field: 'author',
+            rule: 'geo-author-not-person',
+            severity: 'warning',
+            message: `Author "${item.author}" appears to be an organization or team name`,
+            suggestion:
+              'BlogPosting with author.@type: Person gets cited more than Organization. Use an individual person\'s name.',
+          },
+        ];
+      }
+
+      return [];
+    },
+  };
+}
+
 /** Static E-E-A-T rules (no config dependency) */
 export const geoEeatStaticRules: Rule[] = [
   geoMissingSourceCitations,
@@ -398,11 +468,12 @@ export const geoEeatStaticRules: Rule[] = [
   geoMissingTldr,
 ];
 
-/** Build the complete E-E-A-T rule set from GEO config (6 static + 2 factory). */
+/** Build the complete E-E-A-T rule set from GEO config (6 static + 3 factory). */
 export function createGeoEeatRules(geo: GeoConfig): Rule[] {
   return [
     ...geoEeatStaticRules,
     createGeoMissingAuthorRule(geo.genericAuthorNames ?? []),
     createGeoHeadingTooVagueRule(geo.vagueHeadings ?? []),
+    createGeoAuthorNotPersonRule(geo.brandName),
   ];
 }

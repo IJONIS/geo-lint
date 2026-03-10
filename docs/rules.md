@@ -1,16 +1,16 @@
 # Rule Reference
 
-`@ijonis/geo-lint` ships with 92 rules across 5 categories -- the most comprehensive open-source content linter available. SEO rules cover everything you'd expect from a production-grade linter (titles, descriptions, headings, canonical URLs, schema.org, keyword coherence, broken links). GEO rules go further, validating the structural patterns that determine whether AI search engines cite your content. Content quality rules provide readability analysis inspired by Yoast SEO, built for the agentic lint-fix loop.
+`@ijonis/geo-lint` ships with 97 rules across 5 categories -- the most comprehensive open-source content linter available. SEO rules cover everything you'd expect from a production-grade linter (titles, descriptions, headings, canonical URLs, schema.org, keyword coherence, broken links). GEO rules go further, validating the structural patterns that determine whether AI search engines cite your content. Content quality rules provide readability analysis inspired by Yoast SEO, built for the agentic lint-fix loop.
 
 Every rule includes a `fixStrategy` and `suggestion` field that AI agents consume directly. Run the linter, let your agent fix the violations, re-lint until clean.
 
 | Category | Rules | Severity Mix | Focus |
 |----------|-------|-------------|-------|
-| SEO | 32 | 6 errors, 26 warnings | Titles, descriptions, headings, slugs, OG images, canonical URLs, keywords, links, schema |
+| SEO | 34 | 6 errors, 28 warnings | Titles, descriptions, headings, slugs, OG images, canonical URLs, keywords, links, schema, sameAs, service pages |
 | Content | 14 | 2 errors, 12 warnings | Word count, readability, dates, categories, jargon density, repetition, vocabulary diversity, transition words, sentence variety |
-| Technical | 8 | 3 errors, 5 warnings | Broken links, image files, trailing slashes, external URLs, performance |
+| Technical | 10 | 3 errors, 7 warnings | Broken links, image files, trailing slashes, external URLs, performance, feeds, llms.txt |
 | i18n | 3 | 0 errors, 3 warnings | Translation pairs, locale metadata |
-| GEO | 35 | 0 errors, 35 warnings | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization |
+| GEO | 36 | 0 errors, 36 warnings | AI citation readiness: E-E-A-T signals, content structure, freshness, RAG optimization, author entity type |
 
 ---
 
@@ -68,11 +68,13 @@ Every rule includes a `fixStrategy` and `suggestion` field that AI agents consum
 |------|----------|-------------|
 | `published-noindex` | warning | Published content with noindex may be unintentional |
 
-## Schema (1 rule)
+## Schema (3 rules)
 
 | Rule | Severity | Description |
 |------|----------|-------------|
 | `blog-missing-schema-fields` | warning | Blog posts should have fields for BlogPosting schema |
+| `seo-schema-sameas-incomplete` | warning | Organization sameAs has fewer than 2 entries for entity verification |
+| `seo-service-page-no-schema` | warning | Service page URL matches pattern but lacks Service structured data |
 
 ## Keyword Coherence (3 rules)
 
@@ -174,13 +176,14 @@ Every rule includes a `fixStrategy` and `suggestion` field that AI agents consum
 | `geo-short-citation-blocks` | warning | Section lead paragraphs should be 40+ words |
 | `geo-low-entity-density` | warning | Brand and location should appear in content |
 
-## GEO -- E-E-A-T (8 rules)
+## GEO -- E-E-A-T (9 rules)
 
 | Rule | Severity | Description |
 |------|----------|-------------|
 | `geo-missing-source-citations` | warning | Min 1 source citation per 500 words |
 | `geo-missing-expert-quotes` | warning | Long posts need at least 1 attributed blockquote |
 | `geo-missing-author` | warning | Blog posts need a non-generic author name |
+| `geo-author-not-person` | warning | Blog author is an organization name instead of a person |
 | `geo-heading-too-vague` | warning | Headings must be 3+ words and not generic |
 | `geo-faq-quality` | warning | FAQ sections need 3+ Q&A pairs with proper formatting |
 | `geo-definition-pattern` | warning | "What is X?" headings should start with "X is..." |
@@ -210,6 +213,13 @@ Every rule includes a `fixStrategy` and `suggestion` field that AI agents consum
 | `geo-low-internal-links` | warning | Fewer than 2 internal links |
 | `geo-comparison-table` | warning | Comparison headings without a data table |
 | `geo-inline-html` | warning | Raw HTML tags in markdown content |
+
+## Technical -- Site-Level (2 rules)
+
+| Rule | Severity | Description |
+|------|----------|-------------|
+| `technical-no-feed` | warning | No RSS/Atom/JSON feed declared in config |
+| `technical-no-llms-txt` | warning | No /llms.txt endpoint declared in config |
 
 ## GEO -- RAG Optimization (6 rules)
 

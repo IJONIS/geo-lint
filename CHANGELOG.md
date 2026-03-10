@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-10
+
+### Added
+- `seo-schema-sameas-incomplete` — flags Organization schema with fewer than 2 sameAs entries for entity verification
+- `geo-author-not-person` — flags blog posts with organization names as author instead of a person
+- `seo-service-page-no-schema` — flags service pages without Service structured data
+- `technical-no-feed` — flags sites without RSS/Atom/JSON feeds declared in config
+- `technical-no-llms-txt` — flags sites without /llms.txt endpoint declared in config
+- New config fields: `geo.organizationSameAs`, `geo.servicePagePatterns`
+- New `technical` config section with `feedUrls` and `llmsTxtUrl`
+
+### Changed
+- Rule count increased from 92 to 97
+- `schema-rules.ts` now uses factory pattern (`createSchemaRules`) for config-aware rules
+
 ## [0.1.6] - 2026-03-03
 
 ### Added
