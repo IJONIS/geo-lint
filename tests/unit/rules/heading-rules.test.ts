@@ -67,6 +67,16 @@ describe('missingH1', () => {
     expect(results).toHaveLength(0);
   });
 
+  it('skips missing-h1 for URL-sourced content', () => {
+    const item = createItem({
+      contentType: 'page',
+      body: 'This is content extracted from a URL with no markdown H1.',
+      contentSource: 'url',
+    });
+    const results = missingH1.run(item, ctx);
+    expect(results).toHaveLength(0);
+  });
+
   it('warns for project content without H1', () => {
     const item = createItem({
       body: '## Overview\n\nProject details.',

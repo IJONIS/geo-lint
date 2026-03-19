@@ -146,7 +146,7 @@ export const geoMissingLists: Rule = {
     const wordCount = countWords(item.body);
     if (wordCount < STRUCTURE_MIN_WORDS) return [];
 
-    if (!hasMarkdownList(item.body)) {
+    if (!hasMarkdownList(item.body, item.contentSource)) {
       return [{
         file: getDisplayPath(item),
         field: 'body',

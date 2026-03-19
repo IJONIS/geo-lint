@@ -10,6 +10,7 @@ import { resolveThresholds } from '../utils/resolve-thresholds.js';
 /** Default slug threshold (used when context has no thresholds) */
 const SLUG_DEFAULTS = { maxLength: 75 };
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const URL_PATH_PATTERN = /^[a-z0-9]+(?:[-/][a-z0-9]+)*$/;
 
 /**
  * Rule: Slug must contain only valid characters (lowercase alphanumeric + hyphens)
@@ -22,8 +23,11 @@ export const slugInvalidCharacters: Rule = {
   run: (item: ContentItem): LintResult[] => {
     if (!item.slug) return [];
 
+    const isUrl = item.contentSource === 'url';
+    const pattern = isUrl ? URL_PATH_PATTERN : SLUG_PATTERN;
+
     const hasUppercase = /[A-Z]/.test(item.slug);
-    const matchesPattern = SLUG_PATTERN.test(item.slug);
+    const matchesPattern = pattern.test(item.slug);
 
     if (hasUppercase || !matchesPattern) {
       return [{
@@ -32,7 +36,9 @@ export const slugInvalidCharacters: Rule = {
         rule: 'slug-invalid-characters',
         severity: 'error',
         message: `Slug "${item.slug}" contains invalid characters`,
-        suggestion: 'Slugs must be lowercase alphanumeric with hyphens only (e.g., "my-blog-post")',
+        suggestion: isUrl
+          ? 'URL paths must be lowercase alphanumeric with hyphens and slashes only'
+          : 'Slugs must be lowercase alphanumeric with hyphens only (e.g., "my-blog-post")',
       }];
     }
     return [];

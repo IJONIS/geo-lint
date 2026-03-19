@@ -65,9 +65,32 @@ function jaccardSimilarity(a: Set<string>, b: Set<string>): number {
   return union > 0 ? intersection / union : 0;
 }
 
+/** Common reference/citation boilerplate patterns to exclude from repetition analysis */
+const REFERENCE_PATTERNS: RegExp[] = [
+  /archived from the original on/gi,
+  /retrieved (?:on )?\d/gi,
+  /accessed (?:on )?\d/gi,
+  /cite (?:web|book|journal|news)/gi,
+  /\^\s*\[?\d+\]?/g,
+  /isbn \d/gi,
+  /doi:\s*\d/gi,
+  /pmid:\s*\d/gi,
+];
+
+/** Strip reference boilerplate before repetition analysis */
+function stripReferenceBoilerplate(text: string): string {
+  let result = text;
+  for (const pattern of REFERENCE_PATTERNS) {
+    result = result.replace(pattern, '');
+  }
+  result = result.replace(/\n(?:references|sources|bibliography|einzelnachweise|weblinks)\n[\s\S]*$/i, '');
+  return result;
+}
+
 /** Analyze content for repetitive phrases and paragraph similarity. */
 export function analyzeRepetition(body: string): RepetitionAnalysis {
-  const plain = stripMarkdown(body).toLowerCase();
+  const cleaned = stripReferenceBoilerplate(body);
+  const plain = stripMarkdown(cleaned).toLowerCase();
   const words = plain
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .split(/\s+/)
@@ -91,7 +114,7 @@ export function analyzeRepetition(body: string): RepetitionAnalysis {
     .map(([phrase, count]) => ({ phrase, count }));
 
   // Calculate pairwise paragraph similarity using 3-gram overlap
-  const paragraphs = body
+  const paragraphs = cleaned
     .split(/\n\s*\n/)
     .map(p => p.trim())
     .filter(p => p.length > 0 && !p.startsWith('#') && !p.startsWith('|'));

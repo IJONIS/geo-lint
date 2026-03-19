@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-03-19
+
+### Added
+- `contentSource` field on `ContentItem` — allows rules to distinguish between file-based MDX and URL-extracted content
+- Plain-text structure detection (`src/utils/plaintext-structure.ts`) — heuristic heading, table, list, and FAQ detection for content without markdown formatting
+- GEO rules now fall back to plain-text structure detection when `contentSource` is `'url'`, fixing false 100/100 GEO scores on Readability-extracted content
+- Integration tests for URL scanner compatibility
+
+### Fixed
+- **GEO rules never firing on URL-scanned content** — headings, tables, lists, and FAQ sections are now detected in plain text (no markdown required)
+- **Readability score 0 for German content** — `countSentences` now handles newline-separated sentences and periods without trailing spaces
+- **`slug-invalid-characters` false positive on URL paths** — slashes are now allowed when `contentSource` is `'url'`
+- **`content-repetition` flagging footnotes** — reference boilerplate (Wikipedia citations, DOI, ISBN, etc.) is stripped before n-gram analysis
+- **`missing-h1` false positive on URL content** — rule is skipped when `contentSource` is `'url'` (Readability strips `<h1>`, title is in metadata)
+
 ## [0.2.0] - 2026-03-10
 
 ### Added

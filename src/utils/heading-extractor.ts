@@ -4,6 +4,7 @@
  */
 
 import type { Heading } from '../types.js';
+import { detectPlaintextHeadings } from './plaintext-structure.js';
 
 /**
  * Check if a line is inside a code block
@@ -26,7 +27,7 @@ function isInCodeBlock(lines: string[], lineIndex: number): boolean {
  * Extract all headings from MDX body content
  * Handles markdown-style headings (# H1, ## H2, etc.)
  */
-export function extractHeadings(mdxBody: string): Heading[] {
+export function extractHeadings(mdxBody: string, contentSource?: 'file' | 'url'): Heading[] {
   const headings: Heading[] = [];
   const lines = mdxBody.split('\n');
 
@@ -45,6 +46,11 @@ export function extractHeadings(mdxBody: string): Heading[] {
         line: i + 1, // 1-indexed for display
       });
     }
+  }
+
+  // If no markdown headings found and content is from URL, try plain-text detection
+  if (headings.length === 0 && contentSource === 'url') {
+    return detectPlaintextHeadings(mdxBody);
   }
 
   return headings;

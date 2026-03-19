@@ -67,12 +67,12 @@ export const geoNoQuestionHeadings: Rule = {
     const wordCount = countWords(item.body);
     if (wordCount < GEO_MIN_WORDS) return [];
 
-    const headings = extractHeadings(item.body);
+    const headings = extractHeadings(item.body, item.contentSource);
     const subHeadings = headings.filter(h => h.level === 2 || h.level === 3);
 
     if (subHeadings.length === 0) return [];
 
-    const questionCount = countQuestionHeadings(item.body);
+    const questionCount = countQuestionHeadings(item.body, item.contentSource);
     const ratio = questionCount / subHeadings.length;
 
     if (ratio < QUESTION_HEADING_THRESHOLD) {
@@ -193,7 +193,7 @@ export const geoMissingFaqSection: Rule = {
     const wordCount = countWords(item.body);
     if (wordCount < FAQ_MIN_WORDS) return [];
 
-    if (!hasFAQSection(item.body)) {
+    if (!hasFAQSection(item.body, item.contentSource)) {
       return [{
         file: getDisplayPath(item),
         field: 'body',
@@ -252,7 +252,7 @@ export const geoMissingTable: Rule = {
     const wordCount = countWords(item.body);
     if (wordCount < TABLE_MIN_WORDS) return [];
 
-    if (!hasMarkdownTable(item.body)) {
+    if (!hasMarkdownTable(item.body, item.contentSource)) {
       return [{
         file: getDisplayPath(item),
         field: 'body',

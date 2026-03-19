@@ -56,6 +56,8 @@ export interface ContentItem {
   rawContent: string;
   /** Body content without frontmatter */
   body: string;
+  /** How content was acquired: 'file' (MDX on disk) or 'url' (extracted via Readability) */
+  contentSource?: 'file' | 'url';
 }
 
 /**

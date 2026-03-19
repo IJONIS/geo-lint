@@ -5,6 +5,7 @@
 
 import { extractHeadings } from './heading-extractor.js';
 import { countWords } from './word-counter.js';
+import { detectPlaintextFaq, detectPlaintextTable, detectPlaintextList } from './plaintext-structure.js';
 
 /**
  * Question words in English and German (case-insensitive matching)
@@ -49,8 +50,8 @@ const TABLE_SEPARATOR_PATTERN = /\|\s*:?-{2,}/;
  * Count headings that are formatted as questions
  * A question heading either ends with '?' or starts with a question word
  */
-export function countQuestionHeadings(body: string): number {
-  const headings = extractHeadings(body);
+export function countQuestionHeadings(body: string, contentSource?: 'file' | 'url'): number {
+  const headings = extractHeadings(body, contentSource);
   let count = 0;
 
   for (const heading of headings) {
@@ -153,17 +154,25 @@ export function countStatistics(body: string): number {
  * Check if the content body contains a FAQ section
  * Matches common FAQ heading patterns in English and German
  */
-export function hasFAQSection(body: string): boolean {
+export function hasFAQSection(body: string, contentSource?: 'file' | 'url'): boolean {
   const faqPattern = /#{2,3}\s*(FAQ|Häufige Fragen|Frequently Asked|Fragen und Antworten)/i;
-  return faqPattern.test(body);
+  if (faqPattern.test(body)) return true;
+  if (contentSource === 'url') {
+    return detectPlaintextFaq(body).hasFaq;
+  }
+  return false;
 }
 
 /**
  * Check if the content body contains at least one Markdown table
  * Detects the table separator row pattern (e.g., `|---|---`)
  */
-export function hasMarkdownTable(body: string): boolean {
-  return TABLE_SEPARATOR_PATTERN.test(body);
+export function hasMarkdownTable(body: string, contentSource?: 'file' | 'url'): boolean {
+  if (TABLE_SEPARATOR_PATTERN.test(body)) return true;
+  if (contentSource === 'url') {
+    return detectPlaintextTable(body);
+  }
+  return false;
 }
 
 /**
@@ -454,7 +463,7 @@ export function getParagraphs(body: string): Array<{ text: string; line: number;
  * @example
  * hasMarkdownList("Some text\n- item one\n- item two") // true
  */
-export function hasMarkdownList(body: string): boolean {
+export function hasMarkdownList(body: string, contentSource?: 'file' | 'url'): boolean {
   const lines = body.split('\n');
   let inCodeBlock = false;
 
@@ -473,6 +482,10 @@ export function hasMarkdownList(body: string): boolean {
 
     // Check for ordered list items
     if (/^\d+\.\s+/.test(trimmed)) return true;
+  }
+
+  if (contentSource === 'url') {
+    return detectPlaintextList(body);
   }
 
   return false;

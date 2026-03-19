@@ -77,6 +77,22 @@ describe('analyzeRepetition', () => {
   });
 });
 
+// ─── analyzeRepetition reference filtering ────────────────────────────────
+
+describe('analyzeRepetition reference filtering', () => {
+  it('does not flag Wikipedia citation boilerplate as repetition', () => {
+    const citations = Array(20).fill(
+      '"Example Article". Archived from the original on 2024-01-15. Retrieved 2024-02-01.'
+    ).join('\n\n');
+    const body = `## Introduction\n\nThis is unique content about artificial intelligence and modern computing systems.\n\n## Details\n\nMore unique content here about machine learning algorithms and neural networks.\n\n## References\n\n${citations}`;
+    const result = analyzeRepetition(body);
+    const archivePhrase = result.topRepeatedPhrases.find(
+      p => p.phrase.includes('archived from the original')
+    );
+    expect(archivePhrase).toBeUndefined();
+  });
+});
+
 // ─── analyzeSentenceLength ─────────────────────────────────────────────────
 
 describe('analyzeSentenceLength', () => {

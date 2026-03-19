@@ -80,11 +80,25 @@ export function countWords(text: string): number {
 export function countSentences(text: string): number {
   const stripped = stripMarkdown(text);
 
-  // Count sentence-ending punctuation
-  // This is a simplified approach - handles . ! ? followed by space or end
-  const sentences = stripped.match(/[.!?]+(?:\s|$)/g);
+  // Match sentence-ending punctuation followed by:
+  // - whitespace or end of string (original)
+  // - a capital letter (handles no-space after period)
+  // - a newline (handles line-break-separated sentences)
+  const sentenceEndings = stripped.match(/[.!?]+(?:\s|$|(?=[A-ZÄÖÜ]))/g);
 
-  return sentences ? sentences.length : 0;
+  if (sentenceEndings && sentenceEndings.length > 0) {
+    return sentenceEndings.length;
+  }
+
+  // Fallback: estimate from paragraph/line breaks
+  const lines = stripped.split(/\n+/).filter(l => l.trim().length > 20);
+  if (lines.length > 1) {
+    return lines.length;
+  }
+
+  // Last resort: if there are words, assume at least 1 sentence
+  const hasWords = /\w{2,}/.test(stripped);
+  return hasWords ? 1 : 0;
 }
 
 /**

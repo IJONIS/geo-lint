@@ -24,6 +24,12 @@ export const missingH1: Rule = {
   category: 'seo',
   fixStrategy: 'Add an H1 heading (# Heading) at the start of the content',
   run: (item: ContentItem): LintResult[] => {
+    // Skip H1 check for URL-scanned content — Readability strips <h1>,
+    // the title is in item.title metadata instead
+    if (item.contentSource === 'url') {
+      return [];
+    }
+
     // Skip H1 check for blog posts — BlogHeader renders the H1 from frontmatter title
     if (item.contentType === 'blog') {
       return [];

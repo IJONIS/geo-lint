@@ -8,6 +8,7 @@ import {
   calculateReadability,
   estimateSyllables,
 } from '../../../src/utils/readability.js';
+import { countSentences } from '../../../src/utils/word-counter.js';
 
 // ─── estimateSyllables ───────────────────────────────────────────────────────
 
@@ -120,6 +121,32 @@ describe('calculateReadability', () => {
       const withFr = calculateReadability(simpleGerman, 'fr');
       const withDe = calculateReadability(simpleGerman, 'de');
       expect(withFr.score).toBe(withDe.score);
+    });
+  });
+
+  describe('countSentences edge cases', () => {
+    it('counts sentences in plain text without trailing spaces', () => {
+      const text = 'Dies ist ein Satz.Und noch einer.Und ein dritter.';
+      expect(countSentences(text)).toBeGreaterThanOrEqual(3);
+    });
+
+    it('counts sentences separated by newlines', () => {
+      const text = 'Erster Satz.\nZweiter Satz.\nDritter Satz.';
+      expect(countSentences(text)).toBe(3);
+    });
+
+    it('does not return 0 for German content with words', () => {
+      const germanText = 'Suchmaschinenoptimierung ist wichtig. Unternehmen nutzen SEO. Die Ergebnisse sind messbar.';
+      expect(countSentences(germanText)).toBeGreaterThanOrEqual(3);
+    });
+  });
+
+  describe('calculateReadability for German content', () => {
+    it('returns non-zero score for normal German text', () => {
+      const german = 'Suchmaschinenoptimierung hilft Unternehmen dabei, ihre Sichtbarkeit zu verbessern. Viele Firmen investieren heute in digitale Strategien. Die Ergebnisse sprechen für sich.';
+      const result = calculateReadability(german, 'de');
+      expect(result.score).toBeGreaterThan(0);
+      expect(result.avgSentenceLength).toBeGreaterThan(0);
     });
   });
 

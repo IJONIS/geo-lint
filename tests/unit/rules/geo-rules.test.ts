@@ -347,3 +347,32 @@ describe('createGeoEntityRule', () => {
     expect(results[1].message).toContain('Hamburg');
   });
 });
+
+// ---------------------------------------------------------------------------
+// GEO rules on plain-text content (URL source)
+// ---------------------------------------------------------------------------
+describe('GEO rules on plain-text content (URL source)', () => {
+  it('geo-no-question-headings detects plain-text question headings', () => {
+    const body = `What Is Dropshipping?\n\n${'word '.repeat(120)}\n\nHow Does It Work?\n\n${'word '.repeat(120)}\n\nGetting Started\n\n${'word '.repeat(120)}\n\nAdvanced Tips\n\n${'word '.repeat(120)}`;
+    const item = createItem({ body, contentSource: 'url' });
+    const results = geoNoQuestionHeadings.run(item, ctx);
+    // 2/4 question headings = 50% — passes 20% threshold
+    expect(results).toHaveLength(0);
+  });
+
+  it('geo-missing-table detects tab-separated data', () => {
+    const tableData = 'Feature\tPrice\tStatus\nSEO\t$10\tActive\nGEO\t$20\tActive';
+    const body = `## Overview\n\n${'word '.repeat(500)}\n\n${tableData}`;
+    const item = createItem({ body, contentSource: 'url' });
+    const results = geoMissingTable.run(item, ctx);
+    expect(results).toHaveLength(0);
+  });
+
+  it('geo-missing-faq-section detects Q&A patterns in plain text', () => {
+    const faqText = 'What is SEO?\nSEO stands for Search Engine Optimization and helps websites rank higher in search results.\n\nHow does GEO work?\nGEO optimizes content for generative AI engines that summarize and cite web content.\n\nWhy use both?\nUsing both ensures visibility across traditional search and AI-powered search systems.';
+    const body = `${'word '.repeat(500)}\n\n${faqText}`;
+    const item = createItem({ body, contentSource: 'url' });
+    const results = geoMissingFaqSection.run(item, ctx);
+    expect(results).toHaveLength(0);
+  });
+});
